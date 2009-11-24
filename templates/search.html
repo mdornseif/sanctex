@@ -1,0 +1,101 @@
+{% load sanctions %}
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
+    "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+    <title>Search Names</title>
+</head>
+<body>
+    <h1>Search names</h1>
+    <p>{% if version %}Sanctions data last downloaded: {{ version.download_time|date:"d/m/Y H:i" }}.
+        {% else %}No data downloaded yet.{% endif %}
+        <a href="{% url download %}">Click here to download new data</a>.</p>
+    {% if version %}
+    <h2>Search</h2>
+    <div id="search_form">
+        <form method="POST" action="." enctype="multipart/form-data">
+            {{ form.as_p }}
+            <input type="submit">
+        </form>
+    </div>
+    {% endif %}
+    
+    {% if results %}
+    <div id="results">
+        <h2>Results: {{ names|length }} name{{ names|pluralize }} checked, {{ results|length }} match{{ results|pluralize:"es" }} found</h2>
+        <p>File date: {{ version.version_date|date:"d/m/Y" }}, downloaded: {{ version.download_time|date:"d/m/Y H:i" }}</p>
+        <ul>
+        {% for entity in results %}
+        <li>{{ entity|labelled:"id" }}
+            {{ entity|labelled:"legal_basis" }}
+            {{ entity|labelled:"pdf_link" }}
+            {{ entity|labelled:"reg_date" }}
+            {{ entity|labelled:"legal_basis" }}
+            {{ entity|labelled:"remark" }}
+            {% with entity.name_set.all as names %}
+            {% if names %}
+            <b>Name{{ names|pluralize }}</b>:
+            <ul>
+            {% for name in entity.name_set.all %}
+                <li>{{ name|labelled:"lastname" }}
+                    {{ name|labelled:"firstname" }}
+                    {{ name|labelled:"middlename" }}
+                    {{ name|labelled:"wholename" }}
+                    {{ name|labelled:"gender" }}
+                    {{ name|labelled:"function" }}
+                    {{ name|labelled:"language" }}
+                </li>
+            {% endfor %}
+            </ul>{% endif %}{% endwith %}
+            {% with entity.address_set.all as addresses %}
+            {% if addresses %}<b>Address{{ addresses|pluralize:"es" }}</b>:
+            <ul>
+            {% for address in addresses %}
+                <li>{{ address|labelled:"number" }}
+                    {{ address|labelled:"street" }}
+                    {{ address|labelled:"zipcode" }}
+                    {{ address|labelled:"city" }}
+                    {{ address|labelled:"country" }}
+                    {{ address|labelled:"other" }}
+                </li>
+            {% endfor %}
+            </ul>{% endif %}{% endwith %}
+            {% with entity.birth_set.all as births %}
+            {% if births %}<b>Birth{{ births|pluralize }}</b>:
+            <ul>
+            {% for birth in births %}
+                <li>{{ birth|labelled:"date" }}
+                    {{ birth|labelled:"place" }}
+                    {{ birth|labelled:"country" }}
+                </li>
+            {% endfor %}
+            </ul>{% endif %}{% endwith %}
+            {% with entity.passport_set.all as passports %}
+            {% if passports %}<b>Passport{{ passports|pluralize }}</b>:
+            <ul>
+            {% for passport in passports %}
+                <li>{{ passport|labelled:"number" }}
+                    {{ passport|labelled:"country" }}
+                </li>
+            {% endfor %}
+            </ul>{% endif %}{% endwith %}
+            {% with entity.citizen_set.all as citizens %}
+            {% if citizens %}<b>citizen{{ citizens|pluralize }}</b>:
+            <ul>
+            {% for citizen in citizens %}
+                <li>{{ citizen|labelled:"country" }}
+                </li>
+            {% endfor %}
+            </ul>{% endif %}{% endwith %}
+            
+            </li>
+
+        {% endfor %}
+    </div>
+    {% else %}
+        {% if names %}
+        <h2>No match</h2>
+        {% endif %}
+    {% endif %}
+</body>
+</html>
