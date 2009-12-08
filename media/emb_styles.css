@@ -1,0 +1,46 @@
+
+	body
+	{
+		font-family: arial, helvetica, verdana;
+		font-size:10pt;
+		padding:5px;
+
+	}
+	#emb_subinfo
+	{
+		font-size:8pt;
+		color:#000000;
+	}
+	#emb_container
+	{
+        width:950px;
+        margin-left:auto;
+        margin-right:auto;
+	}
+	#emb_header
+	{
+		border:0px solid #000088;
+		color:#444488;
+	}
+	#emb_content
+	{
+	/*	border:1px solid #000033;*/
+		margin:5px;
+		padding:5px;
+		width:710px;;
+		text-align:justify;
+	    font-size:10pt;
+	}
+	#emb_right
+	{
+	/*	border:1px solid #000033;*/
+		width:200px;
+		padding:5px;
+		margin:5px;
+		float:right;
+		text-align:justify;
+	}
+    #emb_formular
+    {
+        vertical-align:top;
+    }

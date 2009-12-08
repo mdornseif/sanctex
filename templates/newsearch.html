@@ -1,30 +1,47 @@
 {% load sanctions %}
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
-    "http://www.w3.org/TR/html4/strict.dtd">
-<html>
-<head>
-    <title>Search Names</title>
-</head>
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN"
+   "http://www.w3.org/TR/html4/strict.dtd">
 
+<html lang="de">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<title>Embargoliste - Detailansicht</title>
+<link rel="stylesheet" href="/media/emb_styles.css" type="text/css" media="screen">
+</head>
 <body>
-    <h1>Search names</h1>
-    <p>{% if version %}Sanctions data last downloaded: {{ version.download_time|date:"d/m/Y H:i" }}. (Versiondate:{{ version.version_date|date:"d/m/Y" }}).
-        {% else %}No data downloaded yet.{% endif %}
-        <a href="{% url download %}">Click here to download new data</a>. </p>
+	<div id="emb_container">
+<div id="emb_header">
+		<img src="../media/kopf.jpg" width="950" height="120" alt="Kopf">
+		<a href='/why/'>Hintergrund</a> | <a href='/search/'>Suche</a>
+</div>
+<div id="emb_right">
+	</div>
+<div id="emb_content">
+	Hier haben Sie die Möglichkeit weitere Namen und Bezeichnungen zu prüfen. Geben Sie einzelne Namen oder aber eine Liste von Namen ein (Pro Zeile ein Eintrag). Alternativ können Sie auch eine .txt Datei hochladen, in der ebenfalls pro Zeile ein Name steht. Ein ausführliches Ergebnis Ihrer Anfrage erhalten Sie umgehend nach der Prüfung.<br><br>
+	
+	{% if version %}Aktuelle Liste zuletzt am {{ version.download_time|date:"d.m.Y H:i" }} geladen. (Versionsdatum: {{ version.version_date|date:"d.m.Y" }}).<br>
+		<div id='emb_subinfo'>(Derzeit {{ number_of_entries }} Einträge in der Embargoliste.)</div>
+		<br><a href="{% url download %}">Click here to download new data</a>.
+		{% else %}No data downloaded yet.{% endif %}
+        
     {% if version %}
-    <h2>Search</h2>
+
+    <h2>Suche</h2>
     <div id="search_form">
         <form method="POST" action="." enctype="multipart/form-data">
-            {{ form.as_p }}
-            <input type="submit">
+			<table id='emb_formular'>
+            {{ form.as_table }}
+			</table>
+            <input type="submit" value='Daten abgleichen'>
+			
         </form>
     </div>
     {% endif %}
-    
-    {% if results %}
+
+   {% if results %}
     <div id="results">
-        <h2>Results: {{ names|length }} name{{ names|pluralize }} checked, {{ results|length }} match{{ results|pluralize:"es" }} found</h2>
-        <p>File date: {{ version.version_date|date:"d/m/Y" }}, downloaded: {{ version.download_time|date:"d/m/Y H:i" }}</p>
+        <h2>Ergebnis: {{ names|length }} Name{{ names|pluralize:"n" }} überprüft.<br>
+			{{ results|length }} Treffer.</h2>
         <ul>
         {% for entity in results %}
         <li>{{ entity|labelled:"id" }}
@@ -88,15 +105,19 @@
                 </li>
             {% endfor %}
             </ul>{% endif %}{% endwith %}
-            
+
             </li>
 
         {% endfor %}
     </div>
     {% else %}
         {% if names %}
-        <h2>No match</h2>
+        <h2>Zu Ihren Angaben wurden keine Einträge gefunden.</h2>
         {% endif %}
     {% endif %}
+</div>
+
+
+</div>
 </body>
 </html>

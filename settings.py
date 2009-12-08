@@ -1,10 +1,12 @@
 # Django settings for sanction_names project.
 import os
 OUR_ROOT = os.path.dirname(os.path.realpath(__file__))
+BASEDIR = os.path.abspath(os.path.dirname(__file__))
+
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
-
+TEMPLATE_STRING_IF_INVALID = " #_%s_# "
 ADMINS = (
     # ('Your Name', 'your_email@domain.com'),
 )
@@ -23,11 +25,11 @@ DATABASE_PORT = ''             # Set to empty string for default. Not used with 
 # although not all choices may be available on all operating systems.
 # If running in a Windows environment this must be set to the same as your
 # system time zone.
-TIME_ZONE = 'America/Chicago'
+TIME_ZONE = 'Germany/Berlin'
 
 # Language code for this installation. All choices can be found here:
 # http://www.i18nguy.com/unicode/language-identifiers.html
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'de-de'
 
 SITE_ID = 1
 
@@ -47,7 +49,7 @@ MEDIA_URL = ''
 # URL prefix for admin media -- CSS, JavaScript and images. Make sure to use a
 # trailing slash.
 # Examples: "http://foo.com/media/", "/media/".
-ADMIN_MEDIA_PREFIX = '/media/'
+ADMIN_MEDIA_PREFIX = '/admin_media/'
 
 # Make this unique, and don't share it with anybody.
 SECRET_KEY = 'aqy&tbzz2dl$ths8ys&kh=zsh&i$l*ok&d*h+cgq4ov*l^1_om'
@@ -81,6 +83,7 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.sites',
     'django.contrib.markup',
+    'django.contrib.admin',
     'piston',
     'sanctions'
 )

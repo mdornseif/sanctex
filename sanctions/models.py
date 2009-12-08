@@ -5,6 +5,8 @@
 
 from django.db import models
 
+
+
 class Download(models.Model):
     version_date = models.DateField()
     download_time = models.DateTimeField(auto_now_add=True)
@@ -103,3 +105,4 @@ class Citizen(models.Model):
     reg_date = models.DateField(null=True, blank=True)
     pdf_link = models.URLField(blank=True, verify_exists=False)
     programme = models.CharField(max_length=10, blank=True)
+

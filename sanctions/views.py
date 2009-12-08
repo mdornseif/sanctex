@@ -6,6 +6,7 @@
 import datetime
 import logging
 import urllib
+import random
 from xml.etree import cElementTree as ET
 
 from django.db import connection
@@ -14,6 +15,8 @@ from django import forms
 from django.shortcuts import render_to_response
 
 from sanctions.models import Download, Entity, Name, Address, Birth, Passport, Citizen
+#o.wozniak
+from django.contrib.auth import authenticate, login
 
 
 def download(request):
@@ -34,6 +37,7 @@ def get_data():
     Separated for easier testing.
     """
     url = "http://ec.europa.eu/external_relations/cfsp/sanctions/list/version4/global/global.xml"
+    #url = "global.xml"
     response = urllib.urlopen(url)
     return ET.parse(response).getroot()
 
@@ -45,8 +49,9 @@ def import_sanctions():
     are still happening.
     """
     
-    yield 'Downloading XML...<br>'
+    yield "Downloading ..."
     data = get_data()
+    
     # import pdb;pdb.set_trace()
     version_date = datetime.datetime.strptime(data.get('Date'), '%d/%m/%Y').date()
     Download.objects.create(version_date=version_date)
@@ -126,7 +131,8 @@ def import_sanctions():
                 programme=citizen.get('programme'),
                 country=citizen.findtext('COUNTRY'),
             )
-        yield 'Entity %s created<br>' % e.id
+        yield "Entity %s created ..." % e.id
+       
     yield '<a href="/">Return to search</a>'
 
 
@@ -135,10 +141,17 @@ class SearchForm(forms.Form):
     Form containing search fields.
     """
     name = forms.CharField(required=False)
-    multiple_names = forms.CharField(widget=forms.Textarea, required=False)
-    uploaded = forms.FileField(required=False)
+    mehrere_Namen = forms.CharField(widget=forms.Textarea, required=False)
+    datei_Hochladen = forms.FileField(required=False)
     
-    
+
+class SingleSearchForm(forms.Form):
+    """
+    Single form-field for startpage
+    """
+    name = forms.CharField(required=False)
+
+
 def match(data):
     """
     Query database for entities that have names that match 'data'.
@@ -158,7 +171,9 @@ def match(data):
     entities = Entity.objects.filter(id__in=name_ids)
     return entities
 
+
 def search(request):
+  
     """
     * If the user enters a Single name check if there is any match of their name with 
     - "WHOLENAME" 
@@ -174,7 +189,9 @@ def search(request):
     Display the information required above and a summary ("n entries checked, 
     m matches", etc.) 
     """
+   
     context = {}
+    
     if request.POST:
         form = SearchForm(request.POST, request.FILES)
 
@@ -182,10 +199,10 @@ def search(request):
             names = []
             if form.cleaned_data.get('name'):
                 names.append(form.cleaned_data['name'])
-            if form.cleaned_data.get('multiple_names'):
-                names.extend(form.cleaned_data['multiple_names'].split('\r\n'))
-            if form.cleaned_data.get('uploaded'):
-                names.extend(form.cleaned_data['uploaded'].readlines())
+            if form.cleaned_data.get('mehrere_Namen'):
+                names.extend(form.cleaned_data['mehrere_Namen'].split('\r\n'))
+            if form.cleaned_data.get('datei_Hochladen'):
+                names.extend(form.cleaned_data['datei_Hochladen'].readlines())
             names = set(names)
             matches = set()
             for name in names:
@@ -199,6 +216,39 @@ def search(request):
     context['form'] = form
     try:
         context['version'] = Download.objects.latest('download_time')
+        context['number_of_entries'] = Name.objects.count()
     except Download.DoesNotExist:
         pass
-    return render_to_response('search.html', context)
+    return render_to_response('newsearch.html', context)
+
+
+def why(request):
+    content = {}
+    form = SingleSearchForm() # An unbound form
+    if request.method == 'POST': # If the form has been submitted...
+        form = SingleSearchForm(request.POST) # A form bound to the POST data
+        if form.is_valid(): # All validation rules pass
+            names = []
+            if form.cleaned_data.get('name'):
+                names.append(form.cleaned_data['name'])
+            names = set(names)
+            matches = set()
+            for name in names:
+                matched = set(match(name.strip()))
+                matches = matches.union(matched)
+                
+            content['names'] = names
+            content['results'] = matches          
+    else:
+        form = SingleSearchForm() # An unbound form
+    content['form'] = form
+    try:
+        content['version'] = Download.objects.latest('download_time')
+        content['number_of_entries'] = Name.objects.count()
+              
+        name_enties = Name.objects.exclude(lastname__contains=' ')
+        
+        content['example_name'] = name_enties[random.randrange(0, name_enties.count(), 1)]
+    except Download.DoesNotExist:
+        pass
+    return render_to_response('why.html', content)
