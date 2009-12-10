@@ -21,14 +21,13 @@
 	
 	{% if version %}Aktuelle Liste zuletzt am {{ version.download_time|date:"d.m.Y H:i" }} geladen. (Versionsdatum: {{ version.version_date|date:"d.m.Y" }}).<br>
 		<div id='emb_subinfo'>(Derzeit {{ number_of_entries }} Einträge in der Embargoliste.)</div>
-		<br><a href="{% url download %}">Click here to download new data</a>.
 		{% else %}No data downloaded yet.{% endif %}
         
     {% if version %}
 
     <h2>Suche</h2>
     <div id="search_form">
-        <form method="POST" action="." enctype="multipart/form-data">
+        <form method="GET" action="." enctype="multipart/form-data">
 			<table id='emb_formular'>
             {{ form.as_table }}
 			</table>
@@ -44,22 +43,24 @@
 			{{ results|length }} Treffer.</h2>
         <ul>
         {% for entity in results %}
-        <li>{{ entity|labelled:"id" }}
-            {{ entity|labelled:"legal_basis" }}
-            {{ entity|labelled:"pdf_link" }}
-            {{ entity|labelled:"reg_date" }}
-            {{ entity|labelled:"legal_basis" }}
-            {{ entity|labelled:"remark" }}
+        <li>
+            Rechtsgrundlage: 
+            {% if entry.pdf_link %}<a href="{{ entry.pdf_link }}">
+
+            {% endif %}{{ entity.legal_basis }}{% if entry.pdf_link %}</a>{% endif %}
+            / seit {{ entity.reg_date }}<br/>
+            Anmerkung: {{ entity.remark }}<br/>
             {% with entity.name_set.all as names %}
             {% if names %}
             <b>Name{{ names|pluralize }}</b>:
             <ul>
             {% for name in entity.name_set.all %}
-                <li>{{ name|labelled:"lastname" }}
+                <li>{% ifequal name.gender "M" %}&#9794;{% endifequal %}
+                    {% ifequal name.gender "F" %}&#9792;{% endifequal %}
+                    {{ name|labelled:"lastname" }}
                     {{ name|labelled:"firstname" }}
                     {{ name|labelled:"middlename" }}
                     {{ name|labelled:"wholename" }}
-                    {{ name|labelled:"gender" }}
                     {{ name|labelled:"function" }}
                     {{ name|labelled:"language" }}
                 </li>

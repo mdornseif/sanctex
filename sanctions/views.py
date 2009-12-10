@@ -192,8 +192,8 @@ def search(request):
    
     context = {}
     
-    if request.POST:
-        form = SearchForm(request.POST, request.FILES)
+    if request.GET:
+        form = SearchForm(request.GET, request.FILES)
 
         if form.is_valid():
             names = []
@@ -219,14 +219,14 @@ def search(request):
         context['number_of_entries'] = Name.objects.count()
     except Download.DoesNotExist:
         pass
-    return render_to_response('newsearch.html', context)
+    return render_to_response('sanctions/newsearch.html', context)
 
 
 def why(request):
     content = {}
     form = SingleSearchForm() # An unbound form
-    if request.method == 'POST': # If the form has been submitted...
-        form = SingleSearchForm(request.POST) # A form bound to the POST data
+    if request.method =='GET': # If the form has been submitted...
+        form = SingleSearchForm(request.GET) # A form bound to the GET data
         if form.is_valid(): # All validation rules pass
             names = []
             if form.cleaned_data.get('name'):
@@ -251,4 +251,5 @@ def why(request):
         content['example_name'] = name_enties[random.randrange(0, name_enties.count(), 1)]
     except Download.DoesNotExist:
         pass
-    return render_to_response('why.html', content)
+    return render_to_response('sanctions/why.html', content)
+    
