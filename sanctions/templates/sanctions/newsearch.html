@@ -15,24 +15,23 @@
 		<a href='/why/'>Hintergrund</a> | <a href='/search/'>Suche</a>
 </div>
 <div id="emb_right">
-	</div>
+</div>
 <div id="emb_content">
 	Hier haben Sie die Möglichkeit weitere Namen und Bezeichnungen zu prüfen. Geben Sie einzelne Namen oder aber eine Liste von Namen ein (Pro Zeile ein Eintrag). Alternativ können Sie auch eine .txt Datei hochladen, in der ebenfalls pro Zeile ein Name steht. Ein ausführliches Ergebnis Ihrer Anfrage erhalten Sie umgehend nach der Prüfung.<br><br>
 	
 	{% if version %}Aktuelle Liste zuletzt am {{ version.download_time|date:"d.m.Y H:i" }} geladen. (Versionsdatum: {{ version.version_date|date:"d.m.Y" }}).<br>
-		<div id='emb_subinfo'>(Derzeit {{ number_of_entries }} Einträge in der Embargoliste.)</div>
-		{% else %}No data downloaded yet.{% endif %}
+        <div id='emb_subinfo'>(Derzeit {{ number_of_entries }} Einträge in der Embargoliste.)</div>
+        {% else %}No data downloaded yet.{% endif %}
         
     {% if version %}
 
     <h2>Suche</h2>
     <div id="search_form">
         <form method="GET" action="." enctype="multipart/form-data">
-			<table id='emb_formular'>
+            <table id='emb_formular'>
             {{ form.as_table }}
-			</table>
+            </table>
             <input type="submit" value='Daten abgleichen'>
-			
         </form>
     </div>
     {% endif %}
@@ -40,12 +39,13 @@
    {% if results %}
     <div id="results">
         <h2>Ergebnis: {{ names|length }} Name{{ names|pluralize:"n" }} überprüft.<br>
-			{{ results|length }} Treffer.</h2>
+            {{ results|length }} Treffer.</h2>
         <ul>
         {% for entity in results %}
         <li>
             Rechtsgrundlage: 
             {% if entity.pdf_link %}<a href="{{ entity.pdf_link }}">
+
             {% endif %}{{ entity.legal_basis }}{% if entity.pdf_link %}</a>{% endif %}
             / seit {{ entity.reg_date }}<br/>
             Anmerkung: {{ entity.remark }}<br/>
@@ -54,8 +54,8 @@
             <b>Name{{ names|pluralize }}</b>:
             <ul>
             {% for name in entity.name_set.all %}
-                <li>{% ifequal name.gender "M" %}&#9794; male{% endifequal %}<br/>
-                    {% ifequal name.gender "F" %}&#9792; male{% endifequal %}<br/>
+                <li>{% ifequal name.gender "M" %}&#9794;{% endifequal %}
+                    {% ifequal name.gender "F" %}&#9792;{% endifequal %}
                     {{ name|labelled:"lastname" }}
                     {{ name|labelled:"firstname" }}
                     {{ name|labelled:"middlename" }}
@@ -107,7 +107,7 @@
             </ul>{% endif %}{% endwith %}
 
             </li>
-
+			<br>
         {% endfor %}
     </div>
     {% else %}
