@@ -3,14 +3,12 @@ from django.conf import settings
 
 
 # Uncomment the next two lines to enable the admin:
-# from django.contrib import admin
-# admin.autodiscover()
+from django.contrib import admin
+admin.autodiscover()
 
 urlpatterns = patterns('',
-    # Example:
-    # (r'^sanction_names/', include('sanction_names.foo.urls')),
+    ('^admin/', include(admin.site.urls)),
     url(r'download/$', 'sanctions.views.download', name='download'),
-    (r'^why/', 'sanctions.views.why'),
     (r'^search/', 'sanctions.views.search'),
     (r'api/', include('api.urls')),
    
@@ -18,5 +16,5 @@ urlpatterns = patterns('',
          'document_root': settings.BASEDIR + '/media' }
       ),
       
-     (r'$', 'sanctions.views.why'),
+     (r'^$', 'sanctions.views.index'),
 )

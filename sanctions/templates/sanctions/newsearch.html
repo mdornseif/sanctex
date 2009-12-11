@@ -45,9 +45,8 @@
         {% for entity in results %}
         <li>
             Rechtsgrundlage: 
-            {% if entry.pdf_link %}<a href="{{ entry.pdf_link }}">
-
-            {% endif %}{{ entity.legal_basis }}{% if entry.pdf_link %}</a>{% endif %}
+            {% if entity.pdf_link %}<a href="{{ entity.pdf_link }}">
+            {% endif %}{{ entity.legal_basis }}{% if entity.pdf_link %}</a>{% endif %}
             / seit {{ entity.reg_date }}<br/>
             Anmerkung: {{ entity.remark }}<br/>
             {% with entity.name_set.all as names %}
@@ -55,8 +54,8 @@
             <b>Name{{ names|pluralize }}</b>:
             <ul>
             {% for name in entity.name_set.all %}
-                <li>{% ifequal name.gender "M" %}&#9794;{% endifequal %}
-                    {% ifequal name.gender "F" %}&#9792;{% endifequal %}
+                <li>{% ifequal name.gender "M" %}&#9794; male{% endifequal %}<br/>
+                    {% ifequal name.gender "F" %}&#9792; male{% endifequal %}<br/>
                     {{ name|labelled:"lastname" }}
                     {{ name|labelled:"firstname" }}
                     {{ name|labelled:"middlename" }}

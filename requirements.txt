@@ -1,3 +1,5 @@
+-f http://cybernetics.hudora.biz/nonpublic/eggs/
 Django
 httplib2
 django-piston
+cs

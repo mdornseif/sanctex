@@ -222,7 +222,7 @@ def search(request):
     return render_to_response('sanctions/newsearch.html', context)
 
 
-def why(request):
+def index(request):
     content = {}
     form = SingleSearchForm() # An unbound form
     if request.method =='GET': # If the form has been submitted...
@@ -251,5 +251,5 @@ def why(request):
         content['example_name'] = name_enties[random.randrange(0, name_enties.count(), 1)]
     except Download.DoesNotExist:
         pass
-    return render_to_response('sanctions/why.html', content)
+    return render_to_response('sanctions/index.html', content)
     
