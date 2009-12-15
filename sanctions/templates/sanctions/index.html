@@ -1,143 +1,50 @@
+{% extends "sanctions/base.html" %}
 {% load sanctions %}
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN"
-   "http://www.w3.org/TR/html4/strict.dtd">
 
-<html lang="de">
-<head>
-	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-	<title>Embargoliste</title>
-<link rel="stylesheet" href="/media/emb_styles.css" type="text/css" media="screen">
-</head>
-<body>
-	<div id="emb_container">
-		<div id="emb_header">
-			<img src="../media/kopf.jpg" width="950" height="120" alt="Kopf">
-			<a href='/why/'>Hintergrund</a> | <a href='/search/'>Suche</a> 
-		</div>	
-		<div id="emb_right">
-			Testen Sie unseren Service hier. Geben Sie einen Namen oder die Bezeichnung einer Organisation ein und testen Sie, ob sich ein Eintrag auf der Embargoliste der EU befindet. (z.b.: "{{ example_name }}") <br>  
-		
-			<form method="GET" action=".">
-	            {{ form.as_p }} 
-	            <input type="submit" value="Namen testen">
-	        </form>
-			<div id="emb_subinfo">{{ number_of_entries }} Namenseinträge vorhanden.</div><br>
-		 {% if results %}
-		 	<div id="emb_subinfo">
-			Datenstamm vom: {{ version.version_date|date:"d/m/Y" }}<br>Aktualisiert am: {{ version.download_time|date:"d/m/Y H:i" }}
-			</div>
-			<h3>ACHTUNG!</h3>
-			Zu Ihrer Eingabe {% ifequal results|length 1 %} liegt {% else %} liegen {% endifequal %}
-			{{ results|length }} {% ifequal results|length 1 %} Eintrag {% else %} Einträge {% endifequal %}  vor!<br>
-			Bitte beachten Sie unsere Hinweise zum Ungang mit diesen Daten!<br>Eine detailierte Beschreibung der Suchergebnisse finden Sie unter <a href='/search/'>Suche</a>.
-		{% else %}
-			{% if names %}
-				Zu Ihren Angaben wurden keine Einträge gefunden.
-			{% endif %}
-		{% endif %}			   
+{% block content %}
+    <h2>Das Problem</h2>
+    
+    <p>Alle europäischen Unternehmen es ist nach den EU-Verordnungen
+    <a href='http://eur-lex.europa.eu/LexUriServ/LexUriServ.do?uri=CELEX:32001R2580:DE:NOT'>2580/2001</a>
+    und <a href='http://eur-lex.europa.eu/LexUriServ/LexUriServ.do?uri=CELEX:32002R0881:DE:HTML'>881/2002</a>
+    verboten mit bestimmten Organisationen und Personen Geschäfte zu machen.</p>
 
-<script type="text/javascript"><!--
-google_ad_client = "pub-7956351025361059";
-/* 160x600, Erstellt 10.12.09 */
-google_ad_slot = "0212400152";
-google_ad_width = 160;
-google_ad_height = 600;
-//-->
-</script>
-<script type="text/javascript"
-src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
-</script>
+    <p>§ 34 Abs. 4 und 7 des Aussenwirtschaftsgesetz bedroken entspechende Geschäfte mit erheblichen Strafen.</p>
+    
+    <p>Zoll und Finanzbhörden Prüfen nicht nur, ob entsprechende Geschåuftskontakte vorliegen, sondern
+        auch, ob entsprechende Prozesse zur Verhinderung entsprechender Geschåte existieren.</p>
+        
+    <h2>Erhebliche Mehrbelastung</h2>
+    
+    <p>Vom Zoll wird inzwischen verlangt, dass mindestens vier mal im Jahr alle Geschaftskontakte anhand der
+       Embargoliste überprüft werden. Geschftskontakte sind hierbei Kunden, Lieferanten, Dienstleister
+       und Mitarbeiter.</p>
+       
+    <p>Neben der Prüfung wird auch eine Umfangreiche Dokumentation über den Prüfvorgang verlangt.
+       Eine Gesetzesgrundlage für diese Froderungen ist uns nicht bekannt, aber was tut man nicht
+       alles für sein Zollamt?</p>
+    
+    <h2>Unsere Lösung</h2>
+    
+    <p>Da uns alle Angebote für Software zum Abgleich mit Sanktionslisten zu komplex oder zu teuer oder
+        unseriös oder wie eine Kombination aus allen dreien erschien, haben wir (die Hudora GmbH)
+        beschlossen, eine eiegne Software zum Abgleich mit Sanktionslisten zu entwickeln.</p>
+        
+    <p>Sie können unsere Software kostenfrei nutzen, um einzelne Namen oder ganze Namenslisten zu
+        überprüfen. In Zukunft werden wir zusätzliche Dokumentationsfunktionalität einbinden.</p>
+        
+{% endblock %}
 
-		
-		</div>
-		<div id="emb_content">
-			<h3>Ihre Kontakte und der Terrorismus</h3>
-			Im Zuge der weltweiten Terrorismus-Bekämpfung hat die Europäische Union mit zwei
-			Verordnungen die Rolution des UN-Sicherheitsrates
-			(<a href='http://de.wikipedia.org/wiki/Resolution_1373_des_UN-Sicherheitsrates'>1373/2001<a/>)
-			zur Bekämpfung von Terroristen umgesetzt. Diese Verordnungen
-			(<a href='http://eur-lex.europa.eu/LexUriServ/LexUriServ.do?uri=CELEX:32001R2580:DE:NOT'>2580/2001</a>
-			 – <a href='http://eur-lex.europa.eu/LexUriServ/LexUriServ.do?uri=CELEX:32002R0881:DE:HTML'>881/2002</a>)
-			 verbieten es, terroristischen Organisationen und Einzelpersonen im In- und Ausland
-			 Vermögenswerte und Finanzdienstleistungen bereitzustellen. Betroffen sind alle am
-			 Wirtschaftsleben beteiligten Personen, ex- und importorientierte Unternehmen,
-			 Banken und Versicherungen.
-			<br><br>
-			Nach § 34 Abs. 4 und 7 des
-			<a hre="http://www.gesetze-im-internet.de/awg/index.html">AWG</a>
-			sind Geschäfte mit sanktionierten Personen und
-			Institutionen strafbar. Die Konsequenzen daraus gehen von wirtschaftlichen
-			Geldbußen bis hin zum Freiheitsentzug. Damit sind
-			nicht mehr nur Lieferungen in bestimmte, unter Embargo gestellte Länder
-			verboten bzw. unter Genehmigungspflicht gestellt, sondern auch Geschäftskontakte
-			zu einzelnen, in den Sanktionslisten aufgeführten Personen und Organisationen
-			im In- und Ausland untersagt. Die Verordnung verpflichtet alle 	Unternehmen zu
-			neuen Maßnahmen, um verbotene Geschäftskontakte zu erkennen und zu verhindern.
-			Die Handels-, Finanz- und Zahlungsrestriktionen greifen tief in die
-			Geschäftsabläufe ein. Diejenigen Unternehmen, welche auch die USA als Absatzmarkt
-			haben oder dort gar über Tochterunternehmen verfügen, sind zudem darauf angewiesen,
-			nicht mit dem US-Gesetzgeber in Konflikt zu geraten. Entsprechend gilt es für
-			diese Unternehmen auch, die diversen US-amerikanischen Listen zu beachten. 
-			<br><br>
-			<h3>Strafen bis zu einer halben Million Euro</h3>
-			Zwischenzeitlich gibt es auch einen Erlass des Bundesministeriums der Finanzen,
-			wonach bei Außenwirtschafts-prüfungen in den Unternehmen der Prüfungsdienst
-			zur Mitwirkung verpflichtet wurde und die Verordnungen bei Prüfungsmaßnahmen
-			einzubeziehen sind. Bei Feststellung von Verstößen drohen empfindliche Strafen
-			bis hin zu langjährigen Freiheitsstrafen. Hier rückt vor allem eine Haftung der
-			Unternehmensleitung selbst nach den §§ 13, 14 Abs.2 StGB bei Unterlassen
-			entsprechender organisatorischer Maßnahmen in den näheren Fokus. Von den
-			zuständigen Oberfinanzdirektionen werden im Falle von festgestellten
-			Aufsichtsverletzungen auch Geldbußen gegen Unternehmensverantwortliche
-			selbst nach § 130 OWiG verhängt. Aber auch gegen das Unternehmen als solches
-			können straf- und  ordnungsrechtliche Maßnahmen ausgesprochen werden, wie
-			die gerichtliche Anordnung des Verfalls des Bruttoerlöses nach § 73 Abs.3 StGB
-			bzw. Einziehung von Gegenständen nach § 36 Abs.1 AWG, sowie die Verhängung
-			von Geldbußen bis zu 500.000 € gegen das Unternehmen als solches (§ 30 OWiG).
-			Das Bundeswirtschaftsministerium und das Auswärtige Amt sehen jede
-			Warenlieferung oder Dienstleistung als potenziell von der EG-Verordnung erfasst
-			an. In diesem Sinne stellt das Merkblatt über Embargomaßnahmen zur Bekämpfung
-			des Terrorismus des Bundesamtes für Wirtschaft und Ausfuhrkontrolle (BAFA)
-			vom 20. März dieses Jahres fest: Weder direkt noch indirekt dürfen Terroristen
-			und Terrorgruppen Geld und wirtschaftliche Ressourcen zur Verfügung gestellt
-			werden. Wirtschaftliche Ressourcen sind Vermögenswerte jeder Art, so dass die
-			Verordnung auch die direkte oder indirekte Lieferung von Gütern verbietet.
-			<br><br>
-			Nicht in allen Unternehmen sind offenbar die komplizierten Kontrollmechanismen
-			bereits eingerichtet worden. Die Probleme sind nachvollziehbar: Kontrollen
-			gegenüber einzelnen Embargoländern oder bestimmten Embargowaren sind
-			organisatorisch darstellbar und in der Vergangenheit auch erfolgreich praktiziert
-			worden. Gegenüber länderunabhängig agierenden Personen und Organisationen
-			sind die gleichen Kontrollen aber nur sehr schwer umsetzbar.
-			<br><br>
-			Im Kern bedeutet das: Jede Lieferung in ein Drittland - egal ob in die Schweiz,
-			nach Hongkong oder in die USA – muss daraufhin untersucht werden, ob der
-			Empfänger eine Namensidentität zu einer in den Listen genannten Personen aufweist
-			bzw. einem genannten Unternehmen nahe steht. Aber auch alle Binnenmarkt- und
-			Inlands-geschäfte müssen geprüft werden, da sich die Verbote der
-			Verordnungen eben nicht auf bestimmte Länder, Regionen oder Waren beziehen,
-			sondern auf Personen und Organisationen. Ein verbotener Geschäftskontakt
-			kann überall auf der Welt stattfinden, auch in Deutschland. 
-			<br><br>
-			<h3>Die Lösung: Datenabgleich mit unserem Service</h3>
-			
-		</div>
-	</div>
-</body>
-<!-- Piwik -->
-<script type="text/javascript">
-var pkBaseURL = (("https:" == document.location.protocol) ?
-"https://stats.hudora.de/piwik/" : "http://stats.hudora.de/piwik/");
-document.write(unescape("%3Cscript src='" + pkBaseURL + "piwik.js'
-type='text/javascript'%3E%3C/script%3E"));
-</script><script type="text/javascript">
-try {
-var piwikTracker = Piwik.getTracker(pkBaseURL + "piwik.php", 4);
-piwikTracker.trackPageView();
-piwikTracker.enableLinkTracking();
-} catch( err ) {}
-</script><noscript><p><img
-src="http://stats.hudora.de/piwik/piwik.php?idsite=4" style="border:0"
-alt=""/></p></noscript>
-<!-- End Piwik Tag -->
-</html>
+{% block right %}
+    <h2>So geht's'</h2>
+    
+    <p>Sie können einfach direkt den Namen eines Geschäftspartners oder
+        einer Organisation eingeben und bekommen direkt ein Prüfungsergebnis zurück.
+    </p>
+    
+    Name: (z.B. "Robert Mugabe")<br/>
+    <form method="GET" action="/search/">
+        <input name="name"><br/>
+        <input type="submit" value="testen!">
+    </form>
+{% endblock %}

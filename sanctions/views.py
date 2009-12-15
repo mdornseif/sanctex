@@ -145,13 +145,6 @@ class SearchForm(forms.Form):
     datei_Hochladen = forms.FileField(required=False)
     
 
-class SingleSearchForm(forms.Form):
-    """
-    Single form-field for startpage
-    """
-    name = forms.CharField(required=False)
-
-
 def match(data):
     """
     Query database for entities that have names that match 'data'.
@@ -220,36 +213,3 @@ def search(request):
     except Download.DoesNotExist:
         pass
     return render_to_response('sanctions/newsearch.html', context)
-
-
-def index(request):
-    content = {}
-    form = SingleSearchForm() # An unbound form
-    if request.method =='GET': # If the form has been submitted...
-        form = SingleSearchForm(request.GET) # A form bound to the GET data
-        if form.is_valid(): # All validation rules pass
-            names = []
-            if form.cleaned_data.get('name'):
-                names.append(form.cleaned_data['name'])
-            names = set(names)
-            matches = set()
-            for name in names:
-                matched = set(match(name.strip()))
-                matches = matches.union(matched)
-                
-            content['names'] = names
-            content['results'] = matches          
-    else:
-        form = SingleSearchForm() # An unbound form
-    content['form'] = form
-    try:
-        content['version'] = Download.objects.latest('download_time')
-        content['number_of_entries'] = Name.objects.count()
-              
-        name_enties = Name.objects.exclude(lastname__contains=' ')
-        
-        content['example_name'] = name_enties[random.randrange(0, name_enties.count(), 1)]
-    except Download.DoesNotExist:
-        pass
-    return render_to_response('sanctions/index.html', content)
-    

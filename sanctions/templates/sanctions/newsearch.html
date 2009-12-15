@@ -1,25 +1,9 @@
+{% extends "sanctions/base.html" %}
 {% load sanctions %}
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN"
-   "http://www.w3.org/TR/html4/strict.dtd">
-
-<html lang="de">
-<head>
-	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-	<title>Embargoliste - Detailansicht</title>
-<link rel="stylesheet" href="/media/emb_styles.css" type="text/css" media="screen">
-</head>
-<body>
-	<div id="emb_container">
-<div id="emb_header">
-		<img src="../media/kopf.jpg" width="950" height="120" alt="Kopf">
-		<a href='/why/'>Hintergrund</a> | <a href='/search/'>Suche</a>
-</div>
-<div id="emb_right">
-</div>
-<div id="emb_content">
-	Hier haben Sie die Möglichkeit weitere Namen und Bezeichnungen zu prüfen. Geben Sie einzelne Namen oder aber eine Liste von Namen ein (Pro Zeile ein Eintrag). Alternativ können Sie auch eine .txt Datei hochladen, in der ebenfalls pro Zeile ein Name steht. Ein ausführliches Ergebnis Ihrer Anfrage erhalten Sie umgehend nach der Prüfung.<br><br>
-	
-	{% if version %}Aktuelle Liste zuletzt am {{ version.download_time|date:"d.m.Y H:i" }} geladen. (Versionsdatum: {{ version.version_date|date:"d.m.Y" }}).<br>
+{% block content %}
+   Hier haben Sie die Möglichkeit weitere Namen und Bezeichnungen zu prüfen. Geben Sie einzelne Namen oder aber eine Liste von Namen ein (Pro Zeile ein Eintrag). Alternativ können Sie auch eine .txt Datei hochladen, in der ebenfalls pro Zeile ein Name steht. Ein ausführliches Ergebnis Ihrer Anfrage erhalten Sie umgehend nach der Prüfung.<br><br>
+   
+   {% if version %}Aktuelle Liste zuletzt am {{ version.download_time|date:"d.m.Y H:i" }} geladen. (Versionsdatum: {{ version.version_date|date:"d.m.Y" }}).<br>
         <div id='emb_subinfo'>(Derzeit {{ number_of_entries }} Einträge in der Embargoliste.)</div>
         {% else %}No data downloaded yet.{% endif %}
         
@@ -107,7 +91,7 @@
             </ul>{% endif %}{% endwith %}
 
             </li>
-			<br>
+            <br>
         {% endfor %}
     </div>
     {% else %}
@@ -116,8 +100,4 @@
         {% endif %}
     {% endif %}
 </div>
-
-
-</div>
-</body>
-</html>
+{% endblock %}

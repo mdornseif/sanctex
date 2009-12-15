@@ -31,7 +31,7 @@ ADMINS = (
 MANAGERS = ADMINS
 
 DATABASE_ENGINE = 'sqlite3' # 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
-DATABASE_NAME = '/tmp/django.db'                # Or path to database file if using sqlite3.
+DATABASE_NAME = os.path.join(BASEDIR, 'django.db') # Or path to database file if using sqlite3.
 DATABASE_USER = 'root'                # Not used with sqlite3.
 #DATABASE_PASSWORD = 'djangopass'        # Not used with sqlite3.
 DATABASE_HOST = ''             # Set to empty string for localhost. Not used with sqlite3.
@@ -65,8 +65,7 @@ INSTALLED_APPS = (
     'django.contrib.markup',
     'django.contrib.admin',
     'django.contrib.flatpages',
-    'huimages',
-    'hudjango',
+    #'hudjango',
     'piston',
     'sanctions',
  )
