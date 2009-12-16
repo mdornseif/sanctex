@@ -13,6 +13,7 @@ urlpatterns = patterns('',
     
     (r'^search/', 'sanctions.views.search'),
     (r'^hintergrund/', 'django.views.generic.simple.direct_to_template', {'template': 'sanctions/hintergrund.html'}),
+    (r'^how/', 'django.views.generic.simple.direct_to_template', {'template': 'sanctions/how.html'}),
     (r'^$', 'django.views.generic.simple.direct_to_template', {'template': 'sanctions/index.html'}),
     
     (r'^media/(?P<path>.*)$', 'django.views.static.serve', {

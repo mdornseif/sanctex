@@ -1,5 +1,6 @@
 -f http://cybernetics.hudora.biz/nonpublic/eggs/
 Django
+docutils
 httplib2
 django-piston
 cs

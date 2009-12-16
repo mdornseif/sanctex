@@ -1,9 +1,11 @@
 {% extends "sanctions/base.html" %}
 {% load sanctions %}
+
 {% block content %}
-   Hier haben Sie die Möglichkeit weitere Namen und Bezeichnungen zu prüfen. Geben Sie einzelne Namen oder aber eine Liste von Namen ein (Pro Zeile ein Eintrag). Alternativ können Sie auch eine .txt Datei hochladen, in der ebenfalls pro Zeile ein Name steht. Ein ausführliches Ergebnis Ihrer Anfrage erhalten Sie umgehend nach der Prüfung.<br><br>
-   
-   {% if version %}Aktuelle Liste zuletzt am {{ version.download_time|date:"d.m.Y H:i" }} geladen. (Versionsdatum: {{ version.version_date|date:"d.m.Y" }}).<br>
+<div id="emb_content">
+	Hier haben Sie die Möglichkeit weitere Namen und Bezeichnungen zu prüfen. Geben Sie einzelne Namen oder aber eine Liste von Namen ein (Pro Zeile ein Eintrag). Alternativ können Sie auch eine .txt Datei hochladen, in der ebenfalls pro Zeile ein Name steht. Ein ausführliches Ergebnis Ihrer Anfrage erhalten Sie umgehend nach der Prüfung.<br><br>
+	
+	{% if version %}Aktuelle Liste zuletzt am {{ version.download_time|date:"d.m.Y H:i" }} geladen. (Versionsdatum: {{ version.version_date|date:"d.m.Y" }}).<br>
         <div id='emb_subinfo'>(Derzeit {{ number_of_entries }} Einträge in der Embargoliste.)</div>
         {% else %}No data downloaded yet.{% endif %}
         
@@ -99,5 +101,4 @@
         <h2>Zu Ihren Angaben wurden keine Einträge gefunden.</h2>
         {% endif %}
     {% endif %}
-</div>
 {% endblock %}

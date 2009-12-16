@@ -1,22 +1,23 @@
+{% extends "sanctions/base.html" %}
 {% load sanctions %}
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
-    "http://www.w3.org/TR/html4/strict.dtd">
-<html>
-<head>
-    <title>Search Names</title>
-</head>
 
-<body>
+{% block content %}
     <h1>Search names</h1>
-    <p>{% if version %}Sanctions data last downloaded: {{ version.download_time|date:"d/m/Y H:i" }}. (Versiondate:{{ version.version_date|date:"d/m/Y" }}).
-        {% else %}No data downloaded yet.{% endif %}
-        <a href="{% url download %}">Click here to download new data</a>. </p>
+
+    {% if version %}
+       Aktuelle Liste zuletzt am {{ version.download_time|date:"d.m.Y H:i" }} geladen. (Versionsdatum: {{ version.version_date|date:"d.m.Y" }}).<br/>
+        <div id='emb_subinfo'>(Derzeit {{ number_of_entries }} Einträge in der Embargoliste.)</div>
+    {% else %}
+        No data downloaded yet.
+    {% endif %}
+    
     {% if version %}
     <h2>Search</h2>
     <div id="search_form">
-        <form method="POST" action="." enctype="multipart/form-data">
-            {{ form.as_p }}
-            <input type="submit">
+        Name:<br/>
+        <form method="GET" action=".">
+            <input name="name"><br/>
+            <input type="submit" value="testen!">
         </form>
     </div>
     {% endif %}
@@ -98,5 +99,4 @@
         <h2>No match</h2>
         {% endif %}
     {% endif %}
-</body>
-</html>
+{% endblock %}
