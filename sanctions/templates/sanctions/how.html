@@ -1,0 +1,26 @@
+{% extends "sanctions/base.html" %}
+{% load sanctions %}
+
+{% block content %}
+<h1>Wie funktioniert's</h1>
+
+<p>Ziel unserer Software ist, Namen anhand mit den in Anti-Terror Sanktiosbeschlüssen genannten Personen
+    und Organisationen zu überprüfen. Eine Überprüfung gegen Länder-Embargos sind nicht Bestandteil unseres
+    Projektes.
+    </p>
+
+<p>Wir laden dazu die
+  <a href="http://ec.europa.eu/external_relations/cfsp/sanctions/consol-list_en.htm">maschinenlesbare Liste</a>
+  der EU mit Sanktionssubjekten Herunter und bringen diese in ein Besser auszuwertenes Format.
+  Die Liste wird automatisch einmal im Monat aktualisiert.</p>
+  
+<p>Wenn ein Name zur Überprüfung übergeben wird, dann werden Kombinationen aus Vor- und Nachname gegen die
+   Liste geprüft. Sind Namen auf der Liste, werden die Ensprechenden daten angezeigt.</p>
+   
+<p>Für den automatisieren Zugriff, gibt es eine
+   <a href="http://sanktionen.hudoracybernetics.com/api/">Programmierschnittstelle (API)</a>.</p>
+   
+<p>Bitte berücksichtigen Sie, das der automatisierte Zugriff in Zukunft kostenpflichtig sein wird.
+   Besuchen Sie diese seite regelmässig, um über Änderungen informiert werden.</p>
+
+{% endblock %}
