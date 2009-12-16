@@ -14,13 +14,12 @@ from sanctions.models import Download
 class EntryHandler(BaseHandler):
     """Check for a single Name if it's on one of the lists.
     
-    Returns a empy JSON lsit if there are no matches:
+Returns a empty JSON list if there are no matches::
     
     $ curl -X POST -d 'Peter Hacker' http://127.0.0.1:8000/api/entry/
     []
     
-    If thete are matches a list of dicts is returned listing the reasons this Address matches:
-    
+If thete are matches a list of dicts is returned listing the reasons this Address matches::    
     
     curl -X POST -d 'Robert Mugabe' http://127.0.0.1:8000/api/entry/y/
     [
