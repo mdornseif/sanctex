@@ -13,16 +13,15 @@
 
     <h2>Suche</h2>
     <div id="search_form">
-        <form method="GET" action="." enctype="multipart/form-data">
-            <table id='emb_formular'>
-            {{ form.as_table }}
-            </table>
-            <input type="submit" value='Daten abgleichen'>
+        Name:<br/>
+        <form method="GET" action=".">
+            <textarea name="name"></textarea>
+            <input type="submit" value="testen!">
         </form>
     </div>
-    {% endif %}
+  {% endif %}
 
-   {% if results %}
+  {% if results %}
     <div id="results">
         <h2>Ergebnis: {{ names|length }} Name{{ names|pluralize:"n" }} überprüft.<br>
             {{ results|length }} Treffer.</h2>
