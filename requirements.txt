@@ -1,6 +1,6 @@
--f http://cybernetics.hudora.biz/nonpublic/eggs/
 Django
 docutils
 httplib2
 cs
 -e hg+http://bitbucket.org/jespern/django-piston/#egg=django-piston
+-e git://github.com/hudora/django-googleappsauth.git#egg=googleappsauth
