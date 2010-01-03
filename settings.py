@@ -19,9 +19,10 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.flatpages.middleware.FlatpageFallbackMiddleware',
     'googleappsauth.middleware.GoogleAuthMiddleware',
+    'hoptoad.middleware.HoptoadNotifierMiddleware',
 )
 
-DEBUG = True
+DEBUG = False
 TEMPLATE_DEBUG = DEBUG
 TEMPLATE_STRING_IF_INVALID = " #_%s_# "
 
@@ -37,6 +38,9 @@ DATABASE_PORT = ''             # Set to empty string for default. Not used with 
 SITE_ID = 1
 GOOGLE_OPENID_REALM = 'http://*.hudoracybernetics.com/'
 AUTH_PROTECTED_AREAS = '/admin'
+HOPTOAD_API_KEY = '34a6b7ed9e6d9b50b3c910233263c91b'
+HOPTOAD_NOTIFY_404 = True
+HOPTOAD_NOTIFY_403 = True
 
 # Absolute path to the directory that holds media.
 # Example: "/home/media/media.lawrence.com/"

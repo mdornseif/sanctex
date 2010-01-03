@@ -1,6 +1,8 @@
 Django
 docutils
 httplib2
+pyyaml
+django-hoptoad
 cs
--e hg+http://bitbucket.org/jespern/django-piston/#egg=django-piston
 -e git://github.com/hudora/django-googleappsauth.git#egg=googleappsauth
+-e hg+http://bitbucket.org/jespern/django-piston/#egg=django-piston
