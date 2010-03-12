@@ -7,7 +7,8 @@ from django.contrib import admin
 admin.autodiscover()
 
 urlpatterns = patterns('',
-    ('^admin/', include(admin.site.urls)),
+    (r'^callback_googleappsauth/', 'googleappsauth.views.callback'),
+    (r'^admin/', include(admin.site.urls)),
     url(r'download/$', 'sanctions.views.download', name='download'),
     (r'api/', include('api.urls')),
     

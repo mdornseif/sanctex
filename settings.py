@@ -10,7 +10,6 @@ from cs.global_django_settings import *
 
 #ADMIN_MEDIA_PREFIX = 'http://s.hdimg.net/djangoadmin/1.0.2/'
 
-
 OUR_ROOT = os.path.dirname(os.path.realpath(__file__))
 BASEDIR = os.path.abspath(os.path.dirname(__file__))
 
@@ -19,14 +18,13 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.flatpages.middleware.FlatpageFallbackMiddleware',
+    'googleappsauth.middleware.GoogleAuthMiddleware',
+    'hoptoad.middleware.HoptoadNotifierMiddleware',
 )
 
-DEBUG = True
+DEBUG = False
 TEMPLATE_DEBUG = DEBUG
 TEMPLATE_STRING_IF_INVALID = " #_%s_# "
-ADMINS = (
-    # ('Your Name', 'your_email@domain.com'),
-)
 
 MANAGERS = ADMINS
 
@@ -38,6 +36,11 @@ DATABASE_HOST = ''             # Set to empty string for localhost. Not used wit
 DATABASE_PORT = ''             # Set to empty string for default. Not used with sqlite3.
 
 SITE_ID = 1
+GOOGLE_OPENID_REALM = 'http://*.hudoracybernetics.com/'
+AUTH_PROTECTED_AREAS = '/admin'
+HOPTOAD_API_KEY = '34a6b7ed9e6d9b50b3c910233263c91b'
+HOPTOAD_NOTIFY_404 = True
+HOPTOAD_NOTIFY_403 = True
 
 # Absolute path to the directory that holds media.
 # Example: "/home/media/media.lawrence.com/"
@@ -70,4 +73,5 @@ INSTALLED_APPS = (
     'sanctions',
  )
 
-AUTHENTICATION_BACKENDS = ('django.contrib.auth.backends.ModelBackend',)
+AUTHENTICATION_BACKENDS = ('googleappsauth.backends.GoogleAuthBackend', 
+                           'django.contrib.auth.backends.ModelBackend',)
