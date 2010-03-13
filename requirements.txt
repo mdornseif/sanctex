@@ -1,8 +1,10 @@
 Django
+simplejson
+python-memcached
 docutils
 httplib2
 pyyaml
-googleappsauth
-django-piston
 django-hoptoad
+django-piston
+googleappsauth
 -e git+ssh://git@github.com/hudora/CentralServices#egg=cs

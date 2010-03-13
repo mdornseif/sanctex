@@ -1,19 +1,22 @@
 # setting the PATH seems only to work in GNUmake not in BSDmake
-PATH := ./pythonenv/bin:$(PATH)
+PATH := ../../bin:$(PATH)
+SILVERNODE := sanctex.local
 
 runserver: dependencies
-	./pythonenv/bin/python manage.py syncdb
-	./pythonenv/bin/python manage.py runserver
+	silver serve ../..
 
-generic_templates:
-	sh -c 'echo p | svn co https://cybernetics.hudora.biz/intern/svn/code/projects/html/trunk/templates generic_templates'
+deploy: dependencies
+	silver update --node $(SILVERNODE) ../..
+	(cd ../../; silver run $(SILVERNODE) manage.py syncdb)
 
-dependencies: generic_templates
-	virtualenv pythonenv
-	pip -q install -E pythonenv -r requirements.txt
+#generic_templates:
+#	sh -c 'echo p | svn co https://cybernetics.hudora.biz/intern/svn/code/projects/html/trunk/templates generic_templates'
+
+setup: dependencies
+	../../bin/manage.py syncdb --noinput
+
+dependencies:
+	../../bin/pip -q install -r ./requirements.txt
 
 clean:
-	rm -Rf pythonenv generic_templates build dist html test.db sloccount.sc .pylint.out
-	rm -Rf pip-log.txt *.score
-	rm -Rf pip-log.txt  coverage figleaf-exclude.txt .figleaf* .ropeproject
-	find . -name '*.pyc' -or -name '*.pyo' -or -name 'svn-commit*tmp' | xargs rm
+	find . -name '*.pyc' -or -name '*.pyo' | xargs rm
