@@ -1,22 +1,30 @@
+# we assume this redisdes in a hierachy vreated by silver-build-layout.sh
 # setting the PATH seems only to work in GNUmake not in BSDmake
-PATH := ../../bin:$(PATH)
-SILVERNODE := sanctex.local
+PATH := ../../../bin:$(PATH)
+SILVERNODE := mischosting
 
 runserver: dependencies
-	silver serve ../..
+	silver serve ../../..
 
-deploy: dependencies
-	silver update --node $(SILVERNODE) ../..
-	(cd ../../; silver run $(SILVERNODE) manage.py syncdb)
+deploy:
+	silver update --node $(SILVERNODE) ../../..
+
+firstdeploy:
+	# make SURE all dependencis are in the virtualenv
+	../../../bin/pip install -I -r ./requirements.txt
+	silver -v update --node $(SILVERNODE) ../../..
+	(cd ../../../; silver run $(SILVERNODE) manage.py syncdb  --noinput)
+	# Initial download of data
+	curl -i http://mischosting/download/
 
 #generic_templates:
 #	sh -c 'echo p | svn co https://cybernetics.hudora.biz/intern/svn/code/projects/html/trunk/templates generic_templates'
 
 setup: dependencies
-	../../bin/manage.py syncdb --noinput
+	../../../bin/python ../../../bin/manage.py syncdb --noinput
 
 dependencies:
-	../../bin/pip -q install -r ./requirements.txt
+	../../../bin/pip -q install -r ./requirements.txt
 
 clean:
 	find . -name '*.pyc' -or -name '*.pyo' | xargs rm

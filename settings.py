@@ -3,15 +3,12 @@ import os
 
 import os
 import django
-DJANGO_ROOT = os.path.dirname(os.path.realpath(django.__file__))
-SITE_ROOT = os.path.dirname(os.path.realpath(__file__))
 
 from cs.global_django_settings import *
 
 #ADMIN_MEDIA_PREFIX = 'http://s.hdimg.net/djangoadmin/1.0.2/'
 
 OUR_ROOT = os.path.dirname(os.path.realpath(__file__))
-BASEDIR = os.path.abspath(os.path.dirname(__file__))
 
 MIDDLEWARE_CLASSES = (
     'django.middleware.common.CommonMiddleware',
@@ -22,14 +19,18 @@ MIDDLEWARE_CLASSES = (
     'hoptoad.middleware.HoptoadNotifierMiddleware',
 )
 
-DEBUG = False
+DEBUG = True
+if os.environ.get('SILVER_VERSION', '').startswith('silverlining/'):
+    # we are running on a silverlining manages production server.
+    # see http://cloudsilverlining.org/services.html#silver-version-environmental-variable
+    DEBUG = False
 TEMPLATE_DEBUG = DEBUG
 TEMPLATE_STRING_IF_INVALID = " #_%s_# "
 
 MANAGERS = ADMINS
 
 DATABASE_ENGINE = 'sqlite3' # 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
-DATABASE_NAME = os.path.join(BASEDIR, 'django.db') # Or path to database file if using sqlite3.
+DATABASE_NAME = os.path.join(os.environ['CONFIG_FILES'], 'django.db')
 DATABASE_USER = 'root'                # Not used with sqlite3.
 #DATABASE_PASSWORD = 'djangopass'        # Not used with sqlite3.
 DATABASE_HOST = ''             # Set to empty string for localhost. Not used with sqlite3.

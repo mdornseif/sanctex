@@ -61,7 +61,8 @@ fi
 
 if [ ! -L bin/manage.py ] ; then
     if [ -e src/$PROJECT-src/$PROJECT/manage.py ] ; then
-        ln -s src/$PROJECT-src/$PROJECT/manage.py bin/manage.py
+        (cd bin ; ln -s ../src/$PROJECT-src/$PROJECT/manage.py manage.py)
+        chmod +x bin/manage.py
     fi
 fi
 
@@ -71,7 +72,7 @@ if [ ! -L static/media ] ; then
     cd ..
 fi
 
-./bin/pip install -r src/$PROJECT-src/$PROJECT/requirements.txt
+./bin/pip install -I -r src/$PROJECT-src/$PROJECT/requirements.txt
 
 # if [ ! -e src/django-debug-toolbar ] ; then
 #     git clone git://github.com/robhudson/django-debug-toolbar.git src/django-debug-toolbar

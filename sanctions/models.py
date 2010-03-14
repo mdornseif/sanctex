@@ -29,7 +29,10 @@ class Entity(models.Model):
 
     def __unicode__(self):
         return u"Entity %s" % self.id
-    
+
+    def get_absolute_url(self):
+        return "/entity/%d/" % self.id
+
 
 class Name(models.Model):
     id = models.IntegerField(primary_key=True)
