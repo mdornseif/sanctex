@@ -10,16 +10,17 @@ Copyright (c) 2009 HUDORA. All rights reserved.
 import httplib2
 import simplejson as json
 
-def name_ok(name):
+def on_list(name):
     """Checks if a Name is on the Embargolist. Returns False in Match and True on miss."""
     h = httplib2.Http()
     resp, content = h.request("http://api.local.hudora.biz/embargolist/api/entry/",
                               "POST", body=name,
                               headers={'content-type':'text/plain'})
-    assert resp.status != '200'
-    if json.loads(content) == []:
-        return True
-    return False
+    assert resp.status == '200'
+    content = json.loads(content)
+    if content == []:
+        return False
+    return content.get('url')
 
-# print name_ok("Maximillian Dornseif")
-# print name_ok("Robert Mugabe")
+# print on_list("Maximillian Dornseif")
+# print on_list("Robert Mugabe")

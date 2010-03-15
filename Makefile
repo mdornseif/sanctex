@@ -7,7 +7,7 @@ runserver: dependencies
 	silver serve ../../..
 
 deploy:
-	silver update --node $(SILVERNODE) ../../..
+	silver update --host 'sanktionen.hudoracybernetics.com' --node $(SILVERNODE) ../../..
 
 firstdeploy:
 	# make SURE all dependencis are in the virtualenv

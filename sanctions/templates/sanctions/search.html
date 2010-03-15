@@ -2,48 +2,45 @@
 {% load sanctions %}
 
 {% block content %}
-    <h1>Search names</h1>
-
-    {% if version %}
-       Aktuelle Liste zuletzt am {{ version.download_time|date:"d.m.Y H:i" }} geladen. (Versionsdatum: {{ version.version_date|date:"d.m.Y" }}).<br/>
+<div id="emb_content">
+	Hier haben Sie die Möglichkeit weitere Namen und Bezeichnungen zu prüfen. Geben Sie einzelne Namen oder aber eine Liste von Namen ein (Pro Zeile ein Eintrag). Alternativ können Sie auch eine .txt Datei hochladen, in der ebenfalls pro Zeile ein Name steht. Ein ausführliches Ergebnis Ihrer Anfrage erhalten Sie umgehend nach der Prüfung.<br><br>
+	
+	{% if version %}Aktuelle Liste zuletzt am {{ version.download_time|date:"d.m.Y H:i" }} geladen. (Versionsdatum: {{ version.version_date|date:"d.m.Y" }}).<br>
         <div id='emb_subinfo'>(Derzeit {{ number_of_entries }} Einträge in der Embargoliste.)</div>
-    {% else %}
-        No data downloaded yet.
-    {% endif %}
-    
+        {% else %}No data downloaded yet.{% endif %}
+        
     {% if version %}
-    <h2>Search</h2>
+
+    <h2>Suche</h2>
     <div id="search_form">
         Name:<br/>
         <form method="GET" action=".">
-            <input name="name"><br/>
+            <textarea name="name"></textarea>
             <input type="submit" value="testen!">
         </form>
     </div>
-    {% endif %}
-    
-    {% if results %}
+  {% endif %}
+
+  {% if results %}
     <div id="results">
-        <h2>Results: {{ names|length }} name{{ names|pluralize }} checked, {{ results|length }} match{{ results|pluralize:"es" }} found</h2>
-        <p>File date: {{ version.version_date|date:"d/m/Y" }}, downloaded: {{ version.download_time|date:"d/m/Y H:i" }}</p>
+        <h2>Ergebnis: {{ names|length }} Name{{ names|pluralize:"n" }} überprüft.<br>
+            {{ results|length }} Treffer.</h2>
         <ul>
         {% for entity in results %}
-        <li>{{ entity|labelled:"id" }}
-            {{ entity|labelled:"legal_basis" }}
-            {{ entity|labelled:"pdf_link" }}
-            {{ entity|labelled:"reg_date" }}
-            {{ entity|labelled:"legal_basis" }}
-            {{ entity|labelled:"remark" }}
+        <li id="entity{{ entity.id }}">
+            <a href="{{ entity.get_absolute_url }}">Sanktionslisteneintrag {{ entity.id }}/{{ entity.legal_basis }}</a><br/>
+            Anmerkung: {{ entity.remark }}<br/>
             {% with entity.name_set.all as names %}
             {% if names %}
             <b>Name{{ names|pluralize }}</b>:
             <ul>
             {% for name in entity.name_set.all %}
-                <li>{{ name|labelled:"lastname" }}
+                <li>{% ifequal name.gender "M" %}&#9794;{% endifequal %}
+                    {% ifequal name.gender "F" %}&#9792;{% endifequal %}
+                    {{ name|labelled:"lastname" }}
                     {{ name|labelled:"firstname" }}
                     {{ name|labelled:"middlename" }}
                     {{ name|labelled:"wholename" }}
-                    {{ name|labelled:"gender" }}
                     {{ name|labelled:"function" }}
                     {{ name|labelled:"language" }}
                 </li>
@@ -89,14 +86,17 @@
                 </li>
             {% endfor %}
             </ul>{% endif %}{% endwith %}
-            
+            Rechtsgrundlage: 
+            {% if entity.pdf_link %}<a href="{{ entity.pdf_link }}">
+            {% endif %}{{ entity.legal_basis }}{% if entity.pdf_link %}</a>{% endif %}
+            / aktualisiert am {{ entity.reg_date }}<br/>
             </li>
-
+            <br>
         {% endfor %}
     </div>
     {% else %}
         {% if names %}
-        <h2>No match</h2>
+        <h2>Zu Ihren Angaben wurden keine Einträge gefunden.</h2>
         {% endif %}
     {% endif %}
 {% endblock %}

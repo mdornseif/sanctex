@@ -212,4 +212,4 @@ def search(request):
         context['number_of_entries'] = Name.objects.count()
     except Download.DoesNotExist:
         pass
-    return render_to_response('sanctions/newsearch.html', context)
+    return render_to_response('sanctions/search.html', context)

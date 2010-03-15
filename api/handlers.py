@@ -19,11 +19,12 @@ Returns a empty JSON list if there are no matches::
     $ curl -X POST -d 'Peter Hacker' http://127.0.0.1:8000/api/entry/
     []
     
-If thete are matches a list of dicts is returned listing the reasons this Address matches::    
+If there are matches a list of dicts is returned listing the reasons this address matches::
     
-    curl -X POST -d 'Robert Mugabe' http://127.0.0.1:8000/api/entry/y/
+    $ curl -X POST -d 'Robert Mugabe' http://127.0.0.1:8000/api/entry/
     [
         {
+            "url": "http://127.0.0.1:8080/entity/1/", 
             "passports": [
                 {
                     "entity_id": 1, 
@@ -90,6 +91,7 @@ If thete are matches a list of dicts is returned listing the reasons this Addres
         matches = sanctions.views.match(name)
         ret = []
         for match in matches:
+            match.url = request.build_absolute_uri(match.get_absolute_url())
             match.addresses = list(match.address_set.all())
             match.birthdays = list(match.birth_set.all())
             match.citizenships = list(match.citizen_set.all())
