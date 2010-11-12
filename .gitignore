@@ -1,3 +1,10 @@
 pip-log.txt
 *.pyc
 *~
+.settings
+.project
+.pydevproject
+dbindexer
+django
+djangoappengine
+djangotoolbox
