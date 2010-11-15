@@ -1,12 +1,9 @@
-# Django settings for sanction_names project.
 import os
 
-import os
-import django
+from djangoappengine.settings_base import *
 
-from cs.global_django_settings import *
 
-#ADMIN_MEDIA_PREFIX = 'http://s.hdimg.net/djangoadmin/1.0.2/'
+SECRET_KEY = '=r-$b*8hglm+858&9t043hlm6-&6-3d3vfc4((7yd0dbrakhvi'
 
 OUR_ROOT = os.path.dirname(os.path.realpath(__file__))
 
@@ -14,34 +11,16 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.flatpages.middleware.FlatpageFallbackMiddleware',
+    #'django.contrib.flatpages.middleware.FlatpageFallbackMiddleware',
     'googleappsauth.middleware.GoogleAuthMiddleware',
-    'hoptoad.middleware.HoptoadNotifierMiddleware',
+    #'hoptoad.middleware.HoptoadNotifierMiddleware',
 )
 
-DEBUG = True
-if os.environ.get('SILVER_VERSION', '').startswith('silverlining/'):
-    # we are running on a silverlining manages production server.
-    # see http://cloudsilverlining.org/services.html#silver-version-environmental-variable
-    DEBUG = False
-TEMPLATE_DEBUG = DEBUG
-TEMPLATE_STRING_IF_INVALID = " #_%s_# "
-
-MANAGERS = ADMINS
-
-DATABASE_ENGINE = 'sqlite3' # 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
-DATABASE_NAME = os.path.join(os.environ['CONFIG_FILES'], 'django.db')
-DATABASE_USER = 'root'                # Not used with sqlite3.
-#DATABASE_PASSWORD = 'djangopass'        # Not used with sqlite3.
-DATABASE_HOST = ''             # Set to empty string for localhost. Not used with sqlite3.
-DATABASE_PORT = ''             # Set to empty string for default. Not used with sqlite3.
 
 SITE_ID = 1
+
 GOOGLE_OPENID_REALM = 'http://*.hudoracybernetics.com/'
 AUTH_PROTECTED_AREAS = '/admin'
-HOPTOAD_API_KEY = '34a6b7ed9e6d9b50b3c910233263c91b'
-HOPTOAD_NOTIFY_404 = True
-HOPTOAD_NOTIFY_403 = True
 
 # Absolute path to the directory that holds media.
 # Example: "/home/media/media.lawrence.com/"
@@ -62,6 +41,7 @@ TEMPLATE_DIRS = (
 )
 
 INSTALLED_APPS = (
+    'djangoappengine',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
@@ -69,10 +49,23 @@ INSTALLED_APPS = (
     'django.contrib.markup',
     'django.contrib.admin',
     'django.contrib.flatpages',
-    #'hudjango',
+    'djangotoolbox',
     'piston',
     'sanctions',
- )
+)
 
-AUTHENTICATION_BACKENDS = ('googleappsauth.backends.GoogleAuthBackend', 
+# This test runner captures stdout and associates tracebacks with their
+# corresponding output. Helps a lot with print-debugging.
+TEST_RUNNER = 'djangotoolbox.test.CapturingTestSuiteRunner'
+
+AUTHENTICATION_BACKENDS = ('googleappsauth.backends.GoogleAuthBackend',
                            'django.contrib.auth.backends.ModelBackend',)
+
+# Activate django-dbindexer if available
+try:
+    import dbindexer
+    DATABASES['native'] = DATABASES['default']
+    DATABASES['default'] = {'ENGINE': 'dbindexer', 'TARGET': 'native'}
+    INSTALLED_APPS += ('dbindexer',)
+except ImportError:
+    pass
