@@ -3,6 +3,7 @@
 
 # created november 2009 by danielroseman for Hudora GmbH
 
+import os
 import datetime
 import logging
 import urllib
@@ -13,17 +14,30 @@ from django.db import connection
 from django.http import HttpResponse
 from django import forms
 from django.shortcuts import render_to_response
+from django.contrib.auth import authenticate, login
+from django.conf import settings
+from django.utils.encoding import smart_unicode
 
 from sanctions.models import Download, Entity, Name, Address, Birth, Passport, Citizen
-#o.wozniak
-from django.contrib.auth import authenticate, login
+
+from google.appengine.api import urlfetch
+
+import metaphone
 
 
 def download(request):
     """
     View to trigger download function and show response to user.
     """
+
+    # App Engine does not support cascade deletes
     Entity.objects.all().delete()
+    Name.objects.all().delete()
+    Address.objects.all().delete()
+    Birth.objects.all().delete()
+    Passport.objects.all().delete()
+    Citizen.objects.all().delete()
+
     try:
         return HttpResponse(import_sanctions())
     except Exception, e:
@@ -33,26 +47,24 @@ def download(request):
 def get_data():
     """
     Get data from server and return an ElementTree object.
-    
+
     Separated for easier testing.
     """
     url = "http://ec.europa.eu/external_relations/cfsp/sanctions/list/version4/global/global.xml"
-    #url = "global.xml"
-    response = urllib.urlopen(url)
-    return ET.parse(response).getroot()
+    response = urlfetch.fetch(url, deadline=10)
+    return ET.fromstring(response.content)
 
 def import_sanctions():
     """
     Download, parse and import XML file.
-    
+
     Uses `yield` to stream data to response, giving user an idea that things
     are still happening.
     """
-    
+
     yield "Downloading ..."
     data = get_data()
-    
-    # import pdb;pdb.set_trace()
+
     version_date = datetime.datetime.strptime(data.get('Date'), '%d/%m/%Y').date()
     Download.objects.create(version_date=version_date)
     for entity in data.findall('ENTITY'):
@@ -132,7 +144,7 @@ def import_sanctions():
                 country=citizen.findtext('COUNTRY'),
             )
         yield "Entity %s created ..." % e.id
-       
+
     yield '<a href="/">Return to search</a>'
 
 
@@ -143,7 +155,7 @@ class SearchForm(forms.Form):
     name = forms.CharField(required=False)
     mehrere_Namen = forms.CharField(widget=forms.Textarea, required=False)
     datei_Hochladen = forms.FileField(required=False)
-    
+
 
 def match(data):
     """
@@ -151,40 +163,43 @@ def match(data):
     """
     if not data:
         return []
-    data = data.lower()
-    cursor = connection.cursor()
-    cursor.execute("SELECT entity_id FROM sanctions_name WHERE "
-                   "wholename LIKE %s"
-                   " OR lastname||', '||firstname like %s"
-                   " OR firstname||' '||lastname like %s"
-                   " OR firstname||' '||middlename||' '||lastname like %s",
-                   params=['%%%s%%' % data] * 4
-    )
-    name_ids = [r[0] for r in cursor.fetchall()]
-    entities = Entity.objects.filter(id__in=name_ids)
+
+    data = smart_unicode(data, strings_only=True).lower()
+    search = []
+
+    m1, m2 = metaphone.dm(data)
+    if m1:
+        search.append(m1)
+    if m2:
+        search.append(m2)
+    names = Name.objects.filter(names__in=search)
+
+    ids = [name.entity_id for name in names]
+    entities = Entity.objects.filter(id__in=ids)
+
     return entities
 
 
 def search(request):
-  
+
     """
-    * If the user enters a Single name check if there is any match of their name with 
-    - "WHOLENAME" 
-    - "LASTNAME, FIRSTNAME" 
-    - "FIRSTNAME LASTNAME" 
-    - "FIRSTNAME MIDDLENAME LASTNAME" 
-    * No match on Gender, address, Title etc. 
-    * If there is a match display all information th the matched <ENTITY>, 
-    current timestamp, input name and version of the XML-File used. 
-    else display "no match" 
-    * In addition allow the user to enter several lines in a <textarea> or upload 
-    a file and check line by line if there is a match to the Embargo list. 
-    Display the information required above and a summary ("n entries checked, 
-    m matches", etc.) 
+    * If the user enters a Single name check if there is any match of their name with
+    - "WHOLENAME"
+    - "LASTNAME, FIRSTNAME"
+    - "FIRSTNAME LASTNAME"
+    - "FIRSTNAME MIDDLENAME LASTNAME"
+    * No match on Gender, address, Title etc.
+    * If there is a match display all information th the matched <ENTITY>,
+    current timestamp, input name and version of the XML-File used.
+    else display "no match"
+    * In addition allow the user to enter several lines in a <textarea> or upload
+    a file and check line by line if there is a match to the Embargo list.
+    Display the information required above and a summary ("n entries checked,
+    m matches", etc.)
     """
-   
+
     context = {}
-    
+
     if request.GET:
         form = SearchForm(request.GET, request.FILES)
 
