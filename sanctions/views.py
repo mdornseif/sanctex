@@ -19,41 +19,76 @@ from django import forms
 from django.shortcuts import render_to_response
 from django.contrib.auth import authenticate, login
 from django.conf import settings
-from django.utils.encoding import smart_unicode
+from django.utils.encoding import smart_unicode, smart_str
 
-from sanctions.models import Download, Entity, Name, Address, Birth, Passport, Citizen, NameIndex
+from sanctions.models import Download, Entity, Name, Address, Birth, Passport, Citizen, NameIndex, XmlPart
 
 from google.appengine.api import urlfetch
 from google.appengine.api.labs import taskqueue
+from google.appengine.runtime import DeadlineExceededError
 
 import metaphone
 
+
+class mem: pass
+mem.file_pos = 0
+
+START_MARKER = '<ENTITY'
+END_MARKER = '</ENTITY>'
 
 def download(request):
     """
     View to trigger download function and show response to user.
     """
+    try:
+        mem.file_pos = int(request.GET['pos'])
+    except KeyError:
+        pass
 
-    # App Engine does not support cascade deletes
-#    Entity.objects.all().delete()
-#    Name.objects.all().delete()
-#    NameIndex.objects.all().delete()
-#    Address.objects.all().delete()
-#    Birth.objects.all().delete()
-#    Passport.objects.all().delete()
-#    Citizen.objects.all().delete()
-#    Download.objects.all().delete()
-
-    size = os.path.getsize(settings.SANCTIONS_PATH)
-    start = 0
-    for end in range(100000, size, 100000):
-        taskqueue.add(url=reverse('import-sanctions'),
+    try:
+        read_chunks()
+    except DeadlineExceededError:
+        taskqueue.add(url=reverse('download'),
                       method='GET',
-                      params={'start': start, 'end': end},
-                      queue_name='sanctions-import')
-        start = end - 10000
+                      params={'pos': mem.file_pos})
 
     return http.HttpResponse()
+
+
+def read_chunks(file_pos=0):
+    file_read_size = 100000
+    content = ''
+
+    with open(settings.SANCTIONS_PATH) as f:
+        if mem.file_pos:
+            f.seek(mem.file_pos)
+
+        while True:
+            chunk = f.read(file_read_size)
+            if not chunk:
+                break
+
+            content += chunk
+            entity_start_pos = 0
+            entity_end_pos = 0
+
+            while True:
+                try:
+                    entity_start_pos = content.index(START_MARKER, entity_end_pos)
+                    entity_end_pos = content.index('</ENTITY>', entity_start_pos) + len(END_MARKER)
+                except ValueError:
+                    break
+
+                data = content[entity_start_pos:entity_end_pos]
+
+                part = XmlPart.objects.create(data=data)
+                taskqueue.add(url=reverse('import-sanctions'),
+                              method='GET',
+                              params={'part_pk': part.pk},
+                              queue_name='sanctions-import')
+
+            mem.file_pos += entity_end_pos
+            content = content[entity_end_pos:]
 
 
 def get_data():
@@ -67,22 +102,6 @@ def get_data():
     return ET.fromstring(response.content)
 
 
-START_MARKER = '<ENTITY'
-END_MARKER = '</ENTITY>'
-XML_TEMPLATE = '<WHOLE>%s</WHOLE>'
-
-def get_chunk(start, end):
-    with open(settings.SANCTIONS_PATH) as f:
-        f.seek(start)
-        content = f.read(end)
-
-    start = content.find(START_MARKER)
-    end = content.rfind(END_MARKER) + len(END_MARKER)
-    content = XML_TEMPLATE % content[start:end]
-
-    return ET.fromstring(content)
-
-
 def import_sanctions(request):
     """
     Download, parse and import XML file.
@@ -92,89 +111,79 @@ def import_sanctions(request):
     """
 
     try:
-        start = int(request.GET['start'])
-        end = int(request.GET['end'])
-    except KeyError, ValueError:
+        pk = request.GET['part_pk']
+    except KeyError:
         return http.HttpResponseBadRequest()
 
-    data = get_chunk(start, end)
+    entity = ET.fromstring(smart_str(XmlPart.objects.get(pk=pk).data, strings_only=True))
 
-    for entity in data.findall('ENTITY'):
-        e = Entity.objects.create(
-            id=entity.get('Id'),
-            type=entity.get('Type'),
-            legal_basis=entity.get('legal_basis'),
-            reg_date=entity.get('reg_date') or None,
-            pdf_link=entity.get('pdf_link'),
-            programme=entity.get('programme'),
-            remark=entity.get('remark'),
-        )
-        for name in entity.findall('NAME'):
-            n = Name.objects.create(
-                id=name.get('Id'),
-                entity=e,
-                legal_basis=name.get('legal_basis'),
-                reg_date=name.get('reg_date') or None,
-                pdf_link=name.get('pdf_link'),
-                programme=name.get('programme'),
-                lastname=name.findtext('LASTNAME'),
-                firstname=name.findtext('FIRSTNAME'),
-                middlename=name.findtext('MIDDLENAME'),
-                wholename=name.findtext('WHOLENAME'),
-                gender=name.findtext('GENDER'),
-                title=name.findtext('TITLE'),
-                function=name.findtext('FUNCTION'),
-                language=name.findtext('LANGUAGE'),
-            )
+    e = Entity.objects.create(id=entity.get('Id'),
+                              type=entity.get('Type'),
+                              legal_basis=entity.get('legal_basis'),
+                              reg_date=entity.get('reg_date') or None,
+                              pdf_link=entity.get('pdf_link'),
+                              programme=entity.get('programme'),
+                              remark=entity.get('remark'),)
 
-        for address in entity.findall('ADDRESS'):
-            a = Address.objects.create(
-                id=address.get('Id'),
-                entity=e,
-                legal_basis=address.get('legal_basis'),
-                reg_date=address.get('reg_date') or None,
-                pdf_link=address.get('pdf_link'),
-                programme=address.get('programme'),
-                number=address.findtext('NUMBER'),
-                street=address.findtext('STREET'),
-                city=address.findtext('CITY'),
-                zipcode=address.findtext('ZIPCODE'),
-                country=address.findtext('COUNTRY'),
-                other=address.findtext('OTHER'),
-            )
-        for birth in entity.findall('BIRTH'):
-            b = Birth.objects.create(
-                id=birth.get('Id'),
-                entity=e,
-                legal_basis=birth.get('legal_basis'),
-                reg_date=birth.get('reg_date') or None,
-                pdf_link=birth.get('pdf_link'),
-                programme=birth.get('programme'),
-                date=birth.findtext('DATE'),
-                place=birth.findtext('PLACE'),
-                country=birth.findtext('COUNTRY'),
-            )
-        for passport in entity.findall('PASSPORT'):
-            p = Passport.objects.create(
-                id=passport.get('Id'),
-                entity=e,
-                legal_basis=passport.get('legal_basis'),
-                reg_date=passport.get('reg_date') or None,
-                pdf_link=passport.get('pdf_link'),
-                programme=passport.get('programme'),
-                number=passport.findtext('NUMBER'),
-                country=passport.findtext('COUNTRY'),
-            )
-        for citizen in entity.findall('CITIZEN'):
-            c = Citizen.objects.create(
-                id=citizen.get('Id'),
-                entity=e,
-                legal_basis=citizen.get('legal_basis'),
-                reg_date=citizen.get('reg_date') or None,
-                pdf_link=citizen.get('pdf_link'),
-                programme=citizen.get('programme'),
-                country=citizen.findtext('COUNTRY'),
-            )
+    for name in entity.findall('NAME'):
+        n = Name.objects.create(id=name.get('Id'),
+                                entity=e,
+                                legal_basis=name.get('legal_basis'),
+                                reg_date=name.get('reg_date') or None,
+                                pdf_link=name.get('pdf_link'),
+                                programme=name.get('programme'),
+                                lastname=name.findtext('LASTNAME'),
+                                firstname=name.findtext('FIRSTNAME'),
+                                middlename=name.findtext('MIDDLENAME'),
+                                wholename=name.findtext('WHOLENAME'),
+                                gender=name.findtext('GENDER'),
+                                title=name.findtext('TITLE'),
+                                function=name.findtext('FUNCTION'),
+                                language=name.findtext('LANGUAGE'),)
+
+    for address in entity.findall('ADDRESS'):
+        a = Address.objects.create(id=address.get('Id'),
+                                   entity=e,
+                                   legal_basis=address.get('legal_basis'),
+                                   reg_date=address.get('reg_date') or None,
+                                   pdf_link=address.get('pdf_link'),
+                                   programme=address.get('programme'),
+                                   number=address.findtext('NUMBER'),
+                                   street=address.findtext('STREET'),
+                                   city=address.findtext('CITY'),
+                                   zipcode=address.findtext('ZIPCODE'),
+                                   country=address.findtext('COUNTRY'),
+                                   other=address.findtext('OTHER'),)
+
+    for birth in entity.findall('BIRTH'):
+        b = Birth.objects.create(id=birth.get('Id'),
+                                 entity=e,
+                                 legal_basis=birth.get('legal_basis'),
+                                 reg_date=birth.get('reg_date') or None,
+                                 pdf_link=birth.get('pdf_link'),
+                                 programme=birth.get('programme'),
+                                 date=birth.findtext('DATE'),
+                                 place=birth.findtext('PLACE'),
+                                 country=birth.findtext('COUNTRY'),)
+
+    for passport in entity.findall('PASSPORT'):
+        p = Passport.objects.create(id=passport.get('Id'),
+                                    entity=e,
+                                    legal_basis=passport.get('legal_basis'),
+                                    reg_date=passport.get('reg_date') or None,
+                                    pdf_link=passport.get('pdf_link'),
+                                    programme=passport.get('programme'),
+                                    number=passport.findtext('NUMBER'),
+                                    country=passport.findtext('COUNTRY'),)
+
+    for citizen in entity.findall('CITIZEN'):
+        c = Citizen.objects.create(id=citizen.get('Id'),
+                                   entity=e,
+                                   legal_basis=citizen.get('legal_basis'),
+                                   reg_date=citizen.get('reg_date') or None,
+                                   pdf_link=citizen.get('pdf_link'),
+                                   programme=citizen.get('programme'),
+                                   country=citizen.findtext('COUNTRY'),)
 
     return http.HttpResponse()
 

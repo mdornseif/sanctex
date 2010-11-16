@@ -15,6 +15,8 @@ info_dict = {
     'queryset': Entity.objects.all(),
 }
 
+handler500 = 'djangotoolbox.errorviews.server_error'
+
 urlpatterns = patterns('',
     (r'^callback_googleappsauth/', 'googleappsauth.views.callback'),
     (r'^admin/', include(admin.site.urls)),

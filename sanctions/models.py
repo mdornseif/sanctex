@@ -11,6 +11,10 @@ from djangotoolbox.fields import ListField
 import metaphone
 
 
+class XmlPart(models.Model):
+    data = models.TextField()
+
+
 class Download(models.Model):
     version_date = models.DateField()
     download_time = models.DateTimeField(auto_now_add=True)
