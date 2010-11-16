@@ -19,6 +19,7 @@ urlpatterns = patterns('',
     (r'^callback_googleappsauth/', 'googleappsauth.views.callback'),
     (r'^admin/', include(admin.site.urls)),
     url(r'download/$', 'sanctions.views.download', name='download'),
+    url(r'import-sanctions/$', 'sanctions.views.import_sanctions', name='import-sanctions'),
     (r'api/', include('api.urls')),
 
     (r'^entity/(?P<object_id>\d+)/', 'django.views.generic.list_detail.object_detail', info_dict),

@@ -45,7 +45,6 @@ class Name(models.Model):
     firstname = models.CharField(blank=True, max_length=100)
     middlename = models.CharField(blank=True, max_length=100)
     wholename = models.CharField(blank=True, max_length=100)
-    names = ListField(models.CharField(max_length=100))
     gender = models.CharField(blank=True, max_length=5)
     title = models.CharField(blank=True, max_length=50)
     function = models.TextField(blank=True)
@@ -58,31 +57,23 @@ class Name(models.Model):
     def __unicode__(self):
         return self.wholename or u'%s %s' % (self.firstname, self.lastname)
 
+
+class NameIndex(models.Model):
+    id = models.CharField(primary_key=True, max_length=300)
+    entity = models.ForeignKey(Entity)
+    name_variant = models.CharField(max_length=300)
+    metaphones = ListField(models.CharField(max_length=100))
+
     def save(self, *args, **kwargs):
-        firstname = self.firstname.lower()
-        middlename = self.middlename.lower()
-        lastname = self.lastname.lower()
-        wholename = self.wholename.lower()
+        self.id = self.entity.id + '_' + self.name_variant
 
-        names = [firstname,
-                 middlename,
-                 lastname,
-                 wholename,
-                 ' '.join([firstname, lastname]),
-                 ' '.join([lastname, firstname]),
-                 ' '.join([firstname, middlename, lastname])]
+        m1, m2 = metaphone.dm(smart_unicode(self.name_variant, strings_only=True))
+        if m1:
+            self.metaphones.append(m1)
+        if m2:
+            self.metaphones.append(m2)
 
-        for name in names:
-            if not name: continue
-
-            # metaphone accepts only unicode
-            m1, m2 = metaphone.dm(smart_unicode(name, strings_only=True))
-            if m1:
-                self.names.append(m1)
-            if m2:
-                self.names.append(m2)
-
-        super(Name, self).save(*args, **kwargs)
+        super(NameIndex, self).save(*args, **kwargs)
 
 
 class Address(models.Model):
@@ -140,3 +131,30 @@ class Citizen(models.Model):
     pdf_link = models.URLField(blank=True, verify_exists=False)
     programme = models.CharField(max_length=10, blank=True)
 
+
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+
+@receiver(post_save, sender=Name)
+def create_name_index(sender, instance=None, created=None, **kwargs):
+    if not created:
+        return
+
+    firstname = instance.firstname.lower()
+    middlename = instance.middlename.lower()
+    lastname = instance.lastname.lower()
+    wholename = instance.wholename.lower()
+
+    names = [firstname,
+             middlename,
+             lastname,
+             wholename,
+             ' '.join([firstname, lastname]),
+             ' '.join([lastname, firstname]),
+             ' '.join([firstname, middlename, lastname])]
+
+    for name in names:
+        name = name.strip()
+        if not name: continue
+
+        NameIndex.objects.create(entity=instance.entity, name_variant=name)

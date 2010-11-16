@@ -2,6 +2,7 @@
 # encoding: utf-8
 
 # created november 2009 by danielroseman for Hudora GmbH
+from __future__ import with_statement
 
 import os
 import datetime
@@ -11,16 +12,19 @@ import random
 from xml.etree import cElementTree as ET
 
 from django.db import connection
+from django import http
 from django.http import HttpResponse
+from django.core.urlresolvers import reverse
 from django import forms
 from django.shortcuts import render_to_response
 from django.contrib.auth import authenticate, login
 from django.conf import settings
 from django.utils.encoding import smart_unicode
 
-from sanctions.models import Download, Entity, Name, Address, Birth, Passport, Citizen
+from sanctions.models import Download, Entity, Name, Address, Birth, Passport, Citizen, NameIndex
 
 from google.appengine.api import urlfetch
+from google.appengine.api.labs import taskqueue
 
 import metaphone
 
@@ -31,18 +35,26 @@ def download(request):
     """
 
     # App Engine does not support cascade deletes
-    Entity.objects.all().delete()
-    Name.objects.all().delete()
-    Address.objects.all().delete()
-    Birth.objects.all().delete()
-    Passport.objects.all().delete()
-    Citizen.objects.all().delete()
+#    Entity.objects.all().delete()
+#    Name.objects.all().delete()
+#    NameIndex.objects.all().delete()
+#    Address.objects.all().delete()
+#    Birth.objects.all().delete()
+#    Passport.objects.all().delete()
+#    Citizen.objects.all().delete()
+#    Download.objects.all().delete()
 
-    try:
-        return HttpResponse(import_sanctions())
-    except Exception, e:
-        msg= 'Error found: %s<br><a href="/">Return to search</a>' % e
-        return HttpResponse(msg)
+    size = os.path.getsize(settings.SANCTIONS_PATH)
+    start = 0
+    for end in range(100000, size, 100000):
+        taskqueue.add(url=reverse('import-sanctions'),
+                      method='GET',
+                      params={'start': start, 'end': end},
+                      queue_name='sanctions-import')
+        start = end - 10000
+
+    return http.HttpResponse()
+
 
 def get_data():
     """
@@ -54,7 +66,24 @@ def get_data():
     response = urlfetch.fetch(url, deadline=10)
     return ET.fromstring(response.content)
 
-def import_sanctions():
+
+START_MARKER = '<ENTITY'
+END_MARKER = '</ENTITY>'
+XML_TEMPLATE = '<WHOLE>%s</WHOLE>'
+
+def get_chunk(start, end):
+    with open(settings.SANCTIONS_PATH) as f:
+        f.seek(start)
+        content = f.read(end)
+
+    start = content.find(START_MARKER)
+    end = content.rfind(END_MARKER) + len(END_MARKER)
+    content = XML_TEMPLATE % content[start:end]
+
+    return ET.fromstring(content)
+
+
+def import_sanctions(request):
     """
     Download, parse and import XML file.
 
@@ -62,11 +91,14 @@ def import_sanctions():
     are still happening.
     """
 
-    yield "Downloading ..."
-    data = get_data()
+    try:
+        start = int(request.GET['start'])
+        end = int(request.GET['end'])
+    except KeyError, ValueError:
+        return http.HttpResponseBadRequest()
 
-    version_date = datetime.datetime.strptime(data.get('Date'), '%d/%m/%Y').date()
-    Download.objects.create(version_date=version_date)
+    data = get_chunk(start, end)
+
     for entity in data.findall('ENTITY'):
         e = Entity.objects.create(
             id=entity.get('Id'),
@@ -143,9 +175,8 @@ def import_sanctions():
                 programme=citizen.get('programme'),
                 country=citizen.findtext('COUNTRY'),
             )
-        yield "Entity %s created ..." % e.id
 
-    yield '<a href="/">Return to search</a>'
+    return http.HttpResponse()
 
 
 class SearchForm(forms.Form):
@@ -165,16 +196,20 @@ def match(data):
         return []
 
     data = smart_unicode(data, strings_only=True).lower()
-    search = []
 
+    metaphones = []
     m1, m2 = metaphone.dm(data)
     if m1:
-        search.append(m1)
+        metaphones.append(m1)
     if m2:
-        search.append(m2)
-    names = Name.objects.filter(names__in=search)
+        metaphones.append(m2)
 
+    names = NameIndex.objects.filter(name_variant__gte=data, name_variant__lt=data+u"\ufffd")
     ids = [name.entity_id for name in names]
+
+    names = NameIndex.objects.filter(metaphones__in=metaphones)
+    ids.extend([name.entity_id for name in names])
+
     entities = Entity.objects.filter(id__in=ids)
 
     return entities
@@ -222,9 +257,5 @@ def search(request):
     else:
         form = SearchForm()
     context['form'] = form
-    try:
-        context['version'] = Download.objects.latest('download_time')
-        context['number_of_entries'] = Name.objects.count()
-    except Download.DoesNotExist:
-        pass
+    context['number_of_entries'] = Name.objects.count()
     return render_to_response('sanctions/search.html', context)

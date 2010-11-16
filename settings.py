@@ -6,6 +6,7 @@ from djangoappengine.settings_base import *
 SECRET_KEY = '=r-$b*8hglm+858&9t043hlm6-&6-3d3vfc4((7yd0dbrakhvi'
 
 OUR_ROOT = os.path.dirname(os.path.realpath(__file__))
+SANCTIONS_PATH = os.path.join(OUR_ROOT, 'global.xml')
 
 MIDDLEWARE_CLASSES = (
     'django.middleware.common.CommonMiddleware',
