@@ -2,4 +2,3 @@
 pip-log.txt
 *.pyc
 *~
-django
