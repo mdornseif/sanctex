@@ -1,16 +1,5 @@
+.DS_Store
 pip-log.txt
 *.pyc
 *~
-.settings
-.project
-.pydevproject
-dbindexer
 django
-djangoappengine
-djangotoolbox
-piston
-docutils
-googleappsauth
-httplib2
-simplejson
-metaphone.py

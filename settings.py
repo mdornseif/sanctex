@@ -13,15 +13,10 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     #'django.contrib.flatpages.middleware.FlatpageFallbackMiddleware',
-    'googleappsauth.middleware.GoogleAuthMiddleware',
-    #'hoptoad.middleware.HoptoadNotifierMiddleware',
 )
 
 
 SITE_ID = 1
-
-GOOGLE_OPENID_REALM = 'http://*.hudoracybernetics.com/'
-AUTH_PROTECTED_AREAS = '/admin'
 
 # Absolute path to the directory that holds media.
 # Example: "/home/media/media.lawrence.com/"
@@ -51,7 +46,6 @@ INSTALLED_APPS = (
     'django.contrib.admin',
     'django.contrib.flatpages',
     'djangotoolbox',
-    'piston',
     'sanctions',
 )
 
@@ -59,8 +53,6 @@ INSTALLED_APPS = (
 # corresponding output. Helps a lot with print-debugging.
 TEST_RUNNER = 'djangotoolbox.test.CapturingTestSuiteRunner'
 
-AUTHENTICATION_BACKENDS = ('googleappsauth.backends.GoogleAuthBackend',
-                           'django.contrib.auth.backends.ModelBackend',)
 
 # Activate django-dbindexer if available
 try:

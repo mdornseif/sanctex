@@ -1,15 +1,5 @@
 django
-simplejson
-python-memcached
-docutils
-httplib2
-pyyaml
-django-hoptoad
-django-piston
-googleappsauth
--e git+ssh://git@github.com/hudora/CentralServices#egg=cs
 django-nonrel
 djangoappengine
 djangotoolbox
 django-dbindexer
-metaphone
