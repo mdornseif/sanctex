@@ -1,5 +1,5 @@
-application: sanctex2
-version: 1
+application: sanktex
+version: dev
 runtime: python
 api_version: 1
 
