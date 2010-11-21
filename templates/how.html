@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Wie funktioniert's</h1>
+
+<p>Ziel unserer Software ist, Namen anhand mit den in Anti-Terror Sanktiosbeschlüssen genannten Personen
+    und Organisationen zu überprüfen. Eine Überprüfung gegen Länder-Embargos ist nicht Bestandteil unseres
+    Projektes.
+    </p>
+
+<p>Wir laden dazu die
+  <a href="http://ec.europa.eu/external_relations/cfsp/sanctions/consol-list_en.htm">maschinenlesbare Liste</a>
+  der EU mit Sanktionssubjekten herunter und bringen diese in ein besser auszuwertenes Format.
+  Die Liste wird automatisch etwa einmal im Monat aktualisiert.</p>
+  
+<p>Wenn ein Name zur Überprüfung übergeben wird, dann werden Kombinationen aus Vor- und Nachname gegen die
+   Liste geprüft. Sind Namen auf der Liste, werden die Ensprechenden Daten angezeigt. Daraufhin muss
+   durch den Nutzer in einer Detailüberprüfung anhand Geschlecht, Geburtsort, Pass usw. erfolgen, ob
+   tatsächlich Personenidentität vorliegt.
+</p>
+
+<!--
+<h2>Automatisierter Zugtriff</h2>
+
+<p>Für den automatisieren Zugriff, gibt es eine
+   <a href="http://sanktionen.hudoracybernetics.com/api/">Programmierschnittstelle (API)</a>.</p>
+   
+<p>Bitte berücksichtigen Sie, das der automatisierte Zugriff in Zukunft kostenpflichtig sein wird.
+   Besuchen Sie diese Seite regelmässig, um über Änderungen informiert werden.</p>
+-->
+
+<h2>Reichen diese Prüfungen?</h2>
+
+<p>Unser dienst richtet sich an Versender etc. die in der Regel von Ihren Geschätspartnern nicht mehr
+    als Name und Adresse wissen und auch durch das Bundesdatenschutzgesetz (BDSG) dazu angehalten sind,
+    keine weiteren Daten zu erheben. <em>Die Verordnungen, mit 
+denen Einfriermaßnahmen verhängt werden, schaffen für die Wirtschaftsteilnehmer nicht die 
+zusätzliche Pflicht, "ihre Kunden zu kennen"</em>
+(<a href="http://register.consilium.europa.eu/pdf/de/08/st08/st08666-re01.de08.pdf">8666/1/08: Bewährte Praktiken der EU für die wirksame 
+Umsetzung restriktiver Maßnahmen </a>).</p>
+
+<p>Als reiner B2C Händler sind Sie in Ihren Kundenbeziehungen von den Vorschriften gar nicht erfasst, denn
+<em>die Verhinderung einer persönlichen Verwendung wirtschaftlicher Ressourcen zu Verbrauchszwecken ist weder
+wünschenswert noch wird sie angestrebt</em> (<a
+href="http://register.consilium.europa.eu/pdf/de/08/st08/st08666-re01.de08.pdf">8666/1/08: Bewährte Praktiken
+der EU für die wirksame Umsetzung restriktiver Maßnahmen </a>).</p>
+
+<p>Jedoch sind praktisch alle alle darüber hinaus gehenden Warenlieferungen
+und Zahlungen, Miete und auch Gehalt umfasst.</p>
+
+<p>Die Erfordernisse an das Vorgehen bei der Überprüfung selbst werden von der EU nicht präzisiert. Da aber in den
+    Verordungen Namen, Schreibvarianten und Aliasnamen bereits genannt werden, ist der Wirtschaftsteilnehmern
+    nach unser Auffassung nicht verpflichtet, weitere Varianten - z.B. durch phonetische Suche - zu überprüfen.
+</p>
+
+{% endblock %}

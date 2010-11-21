@@ -1,20 +1,64 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-  <head>
-    <meta content="text/html; charset=UTF-8" http-equiv="content-type" />
-    <title>{% block title %}Sanctions{% endblock %}</title>
-    {% block extrastyle %}{% endblock %}
-    {% block extrahead %}{% endblock %}
-  </head>
-  <body>
-    {% block body %}
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN"
+   "http://www.w3.org/TR/html4/strict.dtd">
 
-    {% block content %}
-    {% endblock content %}
-
-    {% endblock body %}
-
-    {% block extrascript %}
-    {% endblock extrascript %}
-  </body>
+<html lang="de">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>Embargoliste</title>
+<link rel="stylesheet" href="/media/emb_styles.css" type="text/css" media="screen">
+</head>
+<body>
+    <div id="emb_container">
+        <div id="emb_header">
+            <img src="/media/kopf.jpg" width="950" height="120" alt="Kopf">
+              <a href='/'>Startseite</a>
+            | <a href='/hintergrund-der-embargolisten/'>Hintergrund</a>
+            | <a href='/technik-des-santionslistenscreenings/'>Technik</a>
+            | <a href='/pruefung/'>Suche</a>
+            | <a href='http://www.cyberlogi.de/'>Impressum</a>
+        </div>  
+        <div id="emb_right">
+            <div id="adsense">
+                <script type="text/javascript"><!--
+                google_ad_client = "pub-7956351025361059";
+                /* 160x600, Erstellt 10.12.09 */
+                google_ad_slot = "0212400152";
+                google_ad_width = 160;
+                google_ad_height = 600;
+                //-->
+                </script>
+                <script type="text/javascript" src="http://pagead2.googlesyndication.com/pagead/show_ads.js"></script>
+            </div>
+            {% block right %}{% endblock %}
+        </div>
+        <div id="emb_content">
+            {% block content %}{% endblock %}
+        </div>
+    </div>
+<!-- Piwik -->
+<script type="text/javascript">
+var pkBaseURL = (("https:" == document.location.protocol) ? "https://stats.hudora.de/piwik/" : "http://stats.hudora.de/piwik/");
+document.write(unescape("%3Cscript src='" + pkBaseURL + "piwik.js' type='text/javascript'%3E%3C/script%3E"));
+</script><script type="text/javascript">
+try {
+var piwikTracker = Piwik.getTracker(pkBaseURL + "piwik.php", 4);
+piwikTracker.trackPageView();
+piwikTracker.enableLinkTracking();
+} catch( err ) {}
+</script><noscript><p><img src="http://stats.hudora.de/piwik/piwik.php?idsite=4" style="border:0" alt=""/></p></noscript>
+<script type="text/javascript">
+  var _gaq = _gaq || [];
+  //_gaq.push(['_setAccount', 'UA-19763274-2']);
+  _gaq.push(['_setAccount', 'UA-19821039-1']);
+  _gaq.push(['_setDomainName', '.cyberlogi.de']);
+  _gaq.push(['_gat._anonymizeIp']);
+  _gaq.push(['_trackPageview']);
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+<!-- End Piwik Tag -->
+</body>
 </html>
