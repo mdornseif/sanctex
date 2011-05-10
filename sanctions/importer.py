@@ -113,6 +113,7 @@ def import_sanktion(xml):
 
 
 def read_chunks(file_pos=0):
+    row_cnt = 0
     file_read_size = 100000
     content = ''
     f = open('../global.xml')
@@ -134,5 +135,8 @@ def read_chunks(file_pos=0):
             data = content[entity_start_pos:entity_end_pos]
             #import_sanktion(data)
             deferred.defer(import_sanktion, data)
+            row_cnt += 1
+
         mem.file_pos += entity_end_pos
         content = content[entity_end_pos:]
+    return row_cnt

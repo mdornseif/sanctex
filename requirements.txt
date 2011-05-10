@@ -1,5 +1,0 @@
-django
-django-nonrel
-djangoappengine
-djangotoolbox
-django-dbindexer

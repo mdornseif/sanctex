@@ -1,4 +1,4 @@
 cron:
-- description: keep alive
-  url: /
-  schedule: every 2 minutes
+- description: refresh embargo data 2 times a day
+  url: /download/
+  schedule: every 12 hours

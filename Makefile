@@ -15,12 +15,10 @@ lib/google_appengine/google/__init__.py:
 	rm google_appengine_1.3.8.zip
 
 dependencies: clean
-	git submodule update --init lib/gaetk/
-	virtualenv --python=python2.5 --no-site-packages --unzip-setuptools pythonenv
-	pythonenv/bin/pip -q install -E pythonenv -r requirements.txt
+	git submodule update --init 
+	curl -O http://ec.europa.eu/external_relations/cfsp/sanctions/list/version4/global/global.xml
 
 clean:
-	rm -Rf pythonenv/
 	find . -name '*.pyc' -or -name '*.pyo' -delete
 
 .PHONY: deploy pylint dependencies_for_check_target clean check dependencies

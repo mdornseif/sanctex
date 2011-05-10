@@ -84,17 +84,18 @@ class SearchHandler(BasicHandler):
         self.render(context, 'search.html')
 
 
-class DownloadHendler(BasicHandler):
+class DownloadHandler(BasicHandler):
+    """Update the embargo entries from the global.xml file."""
     def get(self):
+        """Read the global.xml file and import each data entry."""
         import sanctions.importer
-        sanctions.importer.read_chunks()
-        self.redirect('/')
+        row_cnt = sanctions.importer.read_chunks()
+        self.response.headers['content-type'] = 'text/plain; charset=utf-8'
+        self.response.out.write('read %d entries from global.xml' % row_cnt)
 
 
 class MainHandler(BasicHandler):
     def get(self):
-        import sanctions.importer
-        sanctions.importer.read_chunks()
         self.render({}, 'homepage.html')
 
 
@@ -105,7 +106,7 @@ def main():
      ('/technik-des-santionslistenscreenings/', TechnikHandler),
      ('/hintergrund-der-embargolisten/', HintergrundHandler),
      ('/pruefung/', SearchHandler),
-     ('/download', DownloadHendler),
+     ('/download/', DownloadHandler),
      ('/', MainHandler),
     ],
     debug=True)
