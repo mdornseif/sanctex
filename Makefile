@@ -21,4 +21,7 @@ dependencies: clean
 clean:
 	find . -name '*.pyc' -or -name '*.pyo' -delete
 
-.PHONY: deploy pylint dependencies_for_check_target clean check dependencies
+resttest: dependencies
+	sh -c 'PYTHONPATH=lib/huTools python tests/resttest.py --hostname=$(TESTHOST) --credentials-user=$(CREDENTIALS_USER)'
+
+.PHONY: deploy pylint dependencies_for_check_target clean check dependencies resttests
