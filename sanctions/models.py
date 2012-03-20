@@ -19,7 +19,7 @@ class Entity(db.Model):
     type = db.StringProperty(required=False)
     legal_basis = db.StringProperty(required=False)
     reg_date = db.StringProperty(required=False)
-    pdf_link = db.LinkProperty(required=False)
+    pdf_link = db.StringProperty(required=False)
     programme = db.StringProperty(required=False)
     lastname = db.TextProperty(required=False)
     addon_data = db.BlobProperty(required=False)
