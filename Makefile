@@ -1,6 +1,6 @@
 GAE_VERSION=1.6.5
 APPID?= sanktex-hrd
-REPOSNAME?=Sanctex
+REPOSNAME?=sanctex
 
 GOOD_NAMES=
 # pyLint
