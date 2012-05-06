@@ -3,3 +3,4 @@ pip-log.txt
 *.pyc
 *~
 lib/google_appengine/
+tmp/
