@@ -18,3 +18,33 @@ Then call http://domain.appspot.com/download/ (this link goes outside odesk.com)
 CancelledError: The API call taskqueue.BulkAdd() was explicitly cancelled. 
 
 This happens because I catch DeadlineExceededError and add task to continue work from saved point.
+
+
+Deployment
+==========
+
+Production
+----------
+
+Wenn alles zufriedenstellend ist, kann der **Produktions-Branch** geupdated werden. Da geht so:
+
+    git clone git@github.com:hudora/sanctex.git
+    cd palpacker/
+    git checkout production
+    git merge --no-ff origin/production  # falls man keinen clean checkout hat
+    git log --pretty=oneline --abbrev-commit origin/production..origin/master > CHANGELOG.tmp
+    git merge --no-ff origin/master
+    cat CHANGELOG.markdown >> CHANGELOG.tmp
+    mv CHANGELOG.tmp CHANGELOG.markdown
+    mate CHANGELOG.markdown
+
+Nun müssen End-User relevante Änderungen in der Datei [CHANGELOG.markdown][1a] bechrieben werden.
+Wenn alle Änderungen akzeptabel & Akzeptiert sind, kann gemerged werden.
+
+    git commit -m 'CHANGELOG angepasst' CHANGELOG.markdown
+    git push origin production
+    git checkout master
+    make deploy_production
+    rm -Rf tmp
+
+[1a]: https://github.com/hudora/Ablage/blob/production/CHANGELOG.markdown
