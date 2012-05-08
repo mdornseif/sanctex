@@ -110,7 +110,7 @@ clean:
 dependencies: clean
 	git submodule update --init
 
-resttest:
+resttest: dependencies
 	sh -c "PYTHONPATH=.:lib/huTools python tests/resttest.py --hostname=$(TESTHOST) --credentials-user=$(CREDENTIALS_USER)"
 
     .PHONY: deploy pylint dependencies_for_check_target clean check dependencies

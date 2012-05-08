@@ -175,7 +175,7 @@ def get_app_version():
     raise RuntimeError("Can't detect version")
 
 
-def create_testclient_from_cli(default_hostname, default_credentials_user, default_credentials_admin):
+def create_testclient_from_cli(default_hostname, default_credentials_user=None, default_credentials_admin=None):
     """ Creates a Testclient with it's arguments from the Commandline.
 
     the CLI understands the options, --hostname, --credentials-user, --credentials-admin, their default
