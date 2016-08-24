@@ -71,7 +71,7 @@ class SearchHandler(wwwHandler):
         fuzzyentities = dict([(x.key, x) for x in list_of_entities if x.key not in entities])
         return entities, fuzzyentities
 
-    def get(self):
+    def get(self, fmt='html'):
         context = {}
         names = self.request.get('name', '').strip().split('\r\n')
         names = set(names)
@@ -83,10 +83,12 @@ class SearchHandler(wwwHandler):
             fuzzymatches.update(fuzzyentities)
             logging.info("search %s %s %s", name, entities, fuzzyentities)
 
-        context['names'] = names
+        context['names'] = list(names)
         context['results'] = matches.values()
         context['fuzzyresults'] = matches.values()
-        self.render(context, 'search.html')
+        self.multirender(fmt, context,
+                         html_template='search.html',
+                         tabular_datanodename='rechnungen')
 
 
 class DownloadHandler(wwwHandler):
@@ -101,6 +103,7 @@ class DownloadHandler(wwwHandler):
 
 class MainHandler(wwwHandler):
     def get(self):
+        # neuster Eintrag von entity.reg_date
         self.render({}, 'homepage.html')
 
 
@@ -108,7 +111,7 @@ application = make_app([
      (r'/entity/(\d+)/(.+)/', EntityHandler),
      (r'/technik-des-santionslistenscreenings/', TechnikHandler),
      (r'/hintergrund-der-embargolisten/', HintergrundHandler),
-     (r'/pruefung/', SearchHandler),
+     (r'/pruefung\.(json|html)', SearchHandler),
      (r'/download/', DownloadHandler),
      (r'/', MainHandler),
 ])
