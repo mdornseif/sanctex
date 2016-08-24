@@ -10,12 +10,14 @@ Copyright (c) 2010 HUDORA. All rights reserved.
 import config
 config.imported = True
 
-from google.appengine.ext import db
-from google.appengine.ext import deferred
-from sanctions.models import Entity, Name
-from xml.etree import cElementTree as ET
 import metaphone
 import pickle
+
+from google.appengine.ext import db
+from google.appengine.ext import deferred
+from sanctions.models import Entity
+from sanctions.models import Name
+from xml.etree import cElementTree as ET
 
 
 class mem:
@@ -116,7 +118,7 @@ def read_chunks(file_pos=0):
     row_cnt = 0
     file_read_size = 100000
     content = ''
-    f = open('../global.xml')
+    f = open('./global.xml')
     #if mem.file_pos:
     #    f.seek(mem.file_pos)
     while True:

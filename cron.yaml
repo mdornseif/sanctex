@@ -1,4 +1,4 @@
 cron:
-- description: refresh embargo data 2 times a day
+- description: refresh embargo data
   url: /download/
-  schedule: every 12 hours
+  schedule: every 72 hours
