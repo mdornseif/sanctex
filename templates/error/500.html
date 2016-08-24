@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>500 - Internal Server Error</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/css/bootstrap-combined.min.css" rel="stylesheet" id="bootstrap-css">
+    <style type="text/css">
+      .center {text-align: center; margin-left: auto; margin-right: auto; margin-bottom: auto; margin-top: auto;}
+    </style>
+    <script src="//code.jquery.com/jquery-1.10.2.min.js"></script>
+    <script src="//netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/js/bootstrap.min.js"></script>
+</head>
+<body>
+    <div class="container">
+  <div class="row">
+    <div class="span12">
+      <div class="hero-unit center">
+          <h1>Internal Server Error <small><font face="Tahoma" color="red">Error 500</font></small></h1>
+          <br />
+          <p>Es ist ein interner Fehler in unserem Server aufgetreten.</p>
+
+          <p>Entweder haben Sie dem armen Gerät irgendetwas grausames zugemutet<br>
+            oder ein externer Dienst will nicht, wie er soll<br>
+            oder wir haben etwas durcheinander gebracht.</p>
+
+          <a href="/" class="btn btn-large btn-info">
+            <i class="icon-home icon-white"></i> zurück zur Homepage</a>
+        </div>
+    </div>
+  </div>
+</div>
+<script src="https://cdn.ravenjs.com/3.0.4/raven.min.js"></script>
+{% if sentry_id %}
+  <script>
+  Raven.showReportDialog({
+    eventId: '{{sentry_event_id}}',
+
+    // use the public DSN (dont include your secret!)
+    dsn: 'https://5210fba32bd84f2f958ca1becd7dbb24@app.getsentry.com/94020'
+  });
+  </script>
+{% endif %}
+</body>
+</html>

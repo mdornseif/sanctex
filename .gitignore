@@ -4,3 +4,4 @@ pip-log.txt
 *~
 lib/google_appengine/
 tmp/
+lib/site-packages/

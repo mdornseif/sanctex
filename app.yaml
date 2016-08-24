@@ -1,12 +1,18 @@
 application: sanktex-hrd
 version: dev
-runtime: python
+runtime: python27
 api_version: 1
+threadsafe: yes
+instance_class: F1
+
 
 builtins:
 - admin_redirect: on
+- remote_api: off
 - appstats: on
-- remote_api: on
+- deferred: on
+# See also https://github.com/freshplanet/AppEngine-Deferred
+# for an alternative
 
 handlers:
 - url: /static
@@ -19,22 +25,31 @@ handlers:
 - url: /media/
   static_dir: media
 
-- url: /_ah/queue/deferred
-  script: $PYTHON_LIB/google/appengine/ext/deferred/handler.py
-  login: admin
+- url: (/_ah/login_required|/gaetk/auth/.*)
+  script: login.application
 
 - url: /mapreduce(/.*)?
-  script: mapreduce/main.py
+  script: mapreduce.main.APP
   login: admin
-  
-- url: /_ah/login_required
-  script: lib/gaetk/gaetk/login.py
-
-- url: /logout
-  script: lib/gaetk/gaetk/login.py
 
 - url: /.*
-  script: sanctions/views.py
+  script: sanctions.views.application
+
+libraries:
+- name: jinja2
+  version: "2.6"
+- name: setuptools
+  version: "0.6c11"
+- name: markupsafe
+  version: "0.15"
+- name: webapp2
+  version: latest
+- name: ssl
+  version: latest
+- name: numpy
+  version: latest
+- name: PIL
+  version: latest
 
 skip_files:
 - ^(.*/)?app\.yaml
@@ -42,11 +57,25 @@ skip_files:
 - ^(.*/)?.*~
 - ^(.*/)?.*\.py[co]
 - ^(.*/)?\..*
-- ^(.*/)?CHANGES
-- ^(.*/)?LICENSE
+- ^(.*/)?(CHANGES|LICENSE|AUTHORS)
 - ^(.*/)?Makefile
 - ^(.*/)?requirements\.txt
 - ^(.*/)?setup.py
-- ^(.*/)?docs?/.*
-- ^(.*/)?README.*
-- ^(.*/)?lib/google_appengine/.*
+- ^.*/(doc|example|test|bin)s?/.*
+- ^(doc|example|test|bin)s?/.*
+- ^.+/README.*
+- ^(.*/)?lib/.*/(cups-backends|odbc_bridge|softm_express|tests|testsuite)/.*
+- ^(.*/)?lib/CentralServices/keys/.*
+- ^(.*/)?lib/jinja2/(scripts|custom_fixers_artwork)/.*
+- ^(.*/)?lib/.*google_appengine/.*
+- ^(.*/)?lib/gae-sessions/(demo|demo-with-google-logins|docs|tests)/.*
+- ^(.*/)?lib/fmtp/printclient/.*
+- ^(.*/)?testenv/.*
+- ^(.*/)?pythonenv/.*
+- ^(.*/)?(CHANGES|LICENSE|AUTHORS)
+- transferfromsoftm/.*
+- .*\.jar
+- ^(.*/)?node_modules/.*
+- ^js_src/.*
+- ^tmp/.*
+- ^venv/.*

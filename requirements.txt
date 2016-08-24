@@ -1,0 +1,3 @@
+GoogleAppEngineCloudStorageClient
+raven>=5.14
+requests

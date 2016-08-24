@@ -1,3 +1,5 @@
-./gaetk
-./huTools
-./jinja2
+./appengine-toolkit
+./CentralServices
+./gae_mini_profiler
+./gaetk_replication
+./huTools-checkout

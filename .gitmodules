@@ -7,3 +7,18 @@
 [submodule "lib/huTools"]
 	path = lib/huTools
 	url = git@github.com:hudora/huTools.git
+[submodule "lib/appengine-toolkit"]
+	path = lib/appengine-toolkit
+	url = git@github.com:mdornseif/appengine-toolkit.git
+[submodule "lib/huTools-checkout"]
+	path = lib/huTools-checkout
+	url = git@github.com:mdornseif/huTools.git
+[submodule "lib/CentralServices"]
+	path = lib/CentralServices
+	url = git@github.com:hudora/CentralServices.git
+[submodule "lib/gae_mini_profiler"]
+	path = lib/gae_mini_profiler
+	url = git://github.com/kamens/gae_mini_profiler.git
+[submodule "lib/gaetk_replication"]
+	path = lib/gaetk_replication
+	url = git@github.com:mdornseif/gaetk_replication.git

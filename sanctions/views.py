@@ -4,37 +4,41 @@
 views.py
 
 Created by Maximillian Dornseif on 2010-11-20.
-Copyright (c) 2010 HUDORA. All rights reserved.
+Copyright (c) 2010, 2016 HUDORA. All rights reserved.
 """
 
 import config
 config.imported = True
 
-from gaetk import webapp2
-from gaetk.handler import BasicHandler
-from sanctions.models import Entity, Name
 import logging
 import metaphone
 
+from cs.gaetk_common import make_app
+from cs.gaetk_common import wwwHandler
+from gaetk import webapp2
 
-class TechnikHandler(BasicHandler):
+from sanctions.models import Entity
+from sanctions.models import Name
+
+
+class TechnikHandler(wwwHandler):
     def get(self):
         self.render({}, 'how.html')
 
 
-class HintergrundHandler(BasicHandler):
+class HintergrundHandler(wwwHandler):
     def get(self):
         self.render({}, 'hintergrund.html')
 
 
-class EntityHandler(BasicHandler):
+class EntityHandler(wwwHandler):
     def get(self, eid, name):
         entity = Entity.all().filter('id = ', eid).get()
         entity.unpickle()
         self.render(dict(entity=entity), 'entity.html')
 
 
-class SearchHandler(BasicHandler):
+class SearchHandler(wwwHandler):
     """
     * If the user enters a Single name check if there is any match of their name with
     - "WHOLENAME"
@@ -84,7 +88,7 @@ class SearchHandler(BasicHandler):
         self.render(context, 'search.html')
 
 
-class DownloadHandler(BasicHandler):
+class DownloadHandler(wwwHandler):
     """Update the embargo entries from the global.xml file."""
     def get(self):
         """Read the global.xml file and import each data entry."""
@@ -94,24 +98,16 @@ class DownloadHandler(BasicHandler):
         self.response.out.write('read %d entries from global.xml' % row_cnt)
 
 
-class MainHandler(BasicHandler):
+class MainHandler(wwwHandler):
     def get(self):
         self.render({}, 'homepage.html')
 
 
-def main():
-    application = webapp2.WSGIApplication(
-    [
+application = make_app([
      ('/entity/(\d+)/(.+)/', EntityHandler),
      ('/technik-des-santionslistenscreenings/', TechnikHandler),
      ('/hintergrund-der-embargolisten/', HintergrundHandler),
      ('/pruefung/', SearchHandler),
      ('/download/', DownloadHandler),
      ('/', MainHandler),
-    ],
-    debug=True)
-    application.run()
-
-
-if __name__ == '__main__':
-    main()
+])
