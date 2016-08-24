@@ -1,5 +1,6 @@
 ./appengine-toolkit
 ./CentralServices
+./double-metaphone
 ./gae_mini_profiler
 ./gaetk_replication
 ./huTools-checkout

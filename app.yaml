@@ -32,6 +32,9 @@ handlers:
   script: mapreduce.main.APP
   login: admin
 
+- url: /(version.txt|robots.txt|_ah/warmup)
+  script: gaetk.defaulthandlers.application
+
 - url: /.*
   script: sanctions.views.application
 

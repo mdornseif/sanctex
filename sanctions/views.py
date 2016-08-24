@@ -16,9 +16,10 @@ import metaphone
 from cs.gaetk_common import make_app
 from cs.gaetk_common import wwwHandler
 from gaetk import webapp2
+from google.appengine.ext import ndb
 
-from sanctions.models import Entity
-from sanctions.models import Name
+from sanctions.models import seEntity
+from sanctions.models import seName
 
 
 class TechnikHandler(wwwHandler):
@@ -33,20 +34,19 @@ class HintergrundHandler(wwwHandler):
 
 class EntityHandler(wwwHandler):
     def get(self, eid, name):
-        entity = Entity.all().filter('id = ', eid).get()
-        entity.unpickle()
+        entity = seEntity.get_by_id(eid)
         self.render(dict(entity=entity), 'entity.html')
 
 
 class SearchHandler(wwwHandler):
     """
-    * If the user enters a Single name check if there is any match of their name with
+    * If the user enters a Single name check if there is any match of their NAME with
     - "WHOLENAME"
     - "LASTNAME, FIRSTNAME"
     - "FIRSTNAME LASTNAME"
     - "FIRSTNAME MIDDLENAME LASTNAME"
     * No match on Gender, address, Title etc.
-    * If there is a match display all information th the matched <ENTITY>,
+    * If there is a match display all information th the matched <seEntity>,
       current timestamp, input name and version of the XML-File used.
       else display "no match"
     * In addition allow the user to enter several lines in a <textarea> or upload
@@ -55,36 +55,37 @@ class SearchHandler(wwwHandler):
       m matches", etc.)
     """
 
-    def match(self, query):
-        """Query database for entities that have names that match 'data'."""
-        query = query.strip().lower()
-        if not query:
+    def match(self, querystring):
+        """Query database for entities that have name that match 'data'."""
+        querystring = querystring.strip().lower()
+        if not querystring:
             return [], []
-        logging.info(query)
-        names = Name.all().filter('searchterms =', query).fetch(25)
-        entities = dict([(x.sanc_entity.id, x.sanc_entity) for x in names])
+        logging.info(querystring)
+        names = seName.query().filter(seName.searchterms==querystring).fetch(25)
+        list_of_entities = ndb.get_multi([x.sanc_entity for x in names])
+        entities = dict([(x.key, x) for x in list_of_entities])
         mph = []
-        for mp in metaphone.dm(query):
-            mph.extend(Name.all().filter('metaphones =', mp).fetch(25))
-        fuzzyentities = dict([(x.sanc_entity.id, x.sanc_entity) for x in mph if x.id not in entities])
-        return entities.values(), fuzzyentities.values()
+        for mp in metaphone.dm(querystring):
+            mph.extend(seName.query().filter(seName.metaphones==mp).fetch(25))
+        list_of_entities = ndb.get_multi([x.sanc_entity for x in mph])
+        fuzzyentities = dict([(x.key, x) for x in list_of_entities if x.key not in entities])
+        return entities, fuzzyentities
 
     def get(self):
         context = {}
         names = self.request.get('name', '').strip().split('\r\n')
         names = set(names)
-        matches = set()
+        matches = dict()
+        fuzzymatches = dict()
         for name in names:
-            logging.info(name)
             entities, fuzzyentities = self.match(name.strip())
-            matched = set(entities)
-            matches = matches.union(matched)
+            matches.update(entities)
+            fuzzymatches.update(fuzzyentities)
+            logging.info("search %s %s %s", name, entities, fuzzyentities)
 
-        for match in matches:
-            match.unpickle()
         context['names'] = names
-        context['results'] = matches
-        #context['number_of_entries'] = Name.objects.count()
+        context['results'] = matches.values()
+        context['fuzzyresults'] = matches.values()
         self.render(context, 'search.html')
 
 
@@ -104,10 +105,10 @@ class MainHandler(wwwHandler):
 
 
 application = make_app([
-     ('/entity/(\d+)/(.+)/', EntityHandler),
-     ('/technik-des-santionslistenscreenings/', TechnikHandler),
-     ('/hintergrund-der-embargolisten/', HintergrundHandler),
-     ('/pruefung/', SearchHandler),
-     ('/download/', DownloadHandler),
-     ('/', MainHandler),
+     (r'/entity/(\d+)/(.+)/', EntityHandler),
+     (r'/technik-des-santionslistenscreenings/', TechnikHandler),
+     (r'/hintergrund-der-embargolisten/', HintergrundHandler),
+     (r'/pruefung/', SearchHandler),
+     (r'/download/', DownloadHandler),
+     (r'/', MainHandler),
 ])

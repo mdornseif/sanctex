@@ -23,8 +23,8 @@
             {{ results|length }} Treffer.</h2>
         <ul>
         {% for entity in results %}
-        <li id="entity{{ entity.id }}">
-            <a href="{{ entity.get_url() }}">Sanktionslisteneintrag {{ entity.id }}/{{ entity.legal_basis }}</a><br/>
+        <li id="entity{{ entity.key.id() }}">
+            <a href="{{ entity.get_url() }}">Sanktionslisteneintrag {{ entity.key.id() }}/{{ entity.legal_basis }}</a><br/>
             Anmerkung: {{ entity.remark }}<br/>
             {% if entity.names %}
             <b>Namen</b>:

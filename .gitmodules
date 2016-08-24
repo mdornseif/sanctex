@@ -22,3 +22,6 @@
 [submodule "lib/gaetk_replication"]
 	path = lib/gaetk_replication
 	url = git@github.com:mdornseif/gaetk_replication.git
+[submodule "lib/double-metaphone"]
+	path = lib/double-metaphone
+	url = git@github.com:mdornseif/double-metaphone.git

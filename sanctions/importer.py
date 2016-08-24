@@ -4,19 +4,21 @@
 importer.py - import data into sanctex
 
 Created by Maximillian Dornseif on 2010-11-21.
-Copyright (c) 2010 HUDORA. All rights reserved.
+Copyright (c) 2010, 2016 HUDORA. All rights reserved.
 """
 
 import config
 config.imported = True
 
+import huTools.http
+import logging
 import metaphone
 import pickle
 
 from google.appengine.ext import db
 from google.appengine.ext import deferred
-from sanctions.models import Entity
-from sanctions.models import Name
+from sanctions.models import seEntity
+from sanctions.models import seName
 from xml.etree import cElementTree as ET
 
 
@@ -29,15 +31,17 @@ END_MARKER = '</ENTITY>'
 
 
 def import_sanktion(xml):
+    logging.debug("xml: %s", xml)
     entity = ET.fromstring(xml)
-    e = Entity(key_name=entity.get('Id'),
+    e = seEntity(
                id=entity.get('Id'),
-               type=entity.get('Type'),
+               typ=entity.get('Type'),
                legal_basis=entity.get('legal_basis'),
                reg_date=entity.get('reg_date'),
                pdf_link=entity.get('pdf_link'),
                programme=entity.get('programme'),
                remark=entity.get('remark'))
+    e.put()
     putlist = [e]
     addon_data = {}
     for name in entity.findall('NAME'):
@@ -53,8 +57,7 @@ def import_sanktion(xml):
         metaphones = []
         for searchterm in searchterms:
             metaphones.extend([x for x in metaphone.dm(unicode(searchterm)) if x])
-        n = Name(key_name=name.get('Id'),
-                 id=name.get('Id'),
+        n = seName(id=name.get('Id'),
                  legal_basis=name.get('legal_basis'),
                  pdf_link=name.get('pdf_link'),
                  programme=name.get('programme'),
@@ -69,7 +72,8 @@ def import_sanktion(xml):
                  searchterms=searchterms,
                  metaphones=metaphones)
         n.reg_date = name.get('reg_date')
-        n.sanc_entity = e
+        n.sanc_entity = e.key
+        n.put()
         putlist.append(n)
     for address in entity.findall('ADDRESS'):
         d = dict(legal_basis=address.get('legal_basis'),
@@ -110,35 +114,32 @@ def import_sanktion(xml):
                  programme=citizen.get('programme'),
                  country=citizen.findtext('COUNTRY'))
         addon_data.setdefault('citizenship', []).append(d)
-    e.addon_data = pickle.dumps(addon_data, 2)
-    db.put(putlist)
+    logging.info("%s addon: %r", n.wholename, addon_data)
+    e.addon_data = addon_data
+    e.put()
+    #db.put(putlist)
 
 
 def read_chunks(file_pos=0):
+    # from http://eeas.europa.eu/cfsp/sanctions/consol-list/index_en.htm
+    _status, _headers, content = huTools.http.fetch2xx(
+        'http://ec.europa.eu/external_relations/cfsp/sanctions/list/version4/global/global.xml',
+    )
+    logging.info("downloaded %d bytes", len(content))
     row_cnt = 0
-    file_read_size = 100000
-    content = ''
-    f = open('./global.xml')
-    #if mem.file_pos:
-    #    f.seek(mem.file_pos)
+    content = content[:]
+    entity_start_pos = 0
+    entity_end_pos = 0
     while True:
-        chunk = f.read(file_read_size)
-        if not chunk:
+        try:
+            entity_start_pos = content.index(START_MARKER, entity_end_pos)
+            entity_end_pos = content.index(END_MARKER, entity_start_pos) + len(END_MARKER)
+        except ValueError:
             break
-        content += chunk
-        entity_start_pos = 0
-        entity_end_pos = 0
-        while True:
-            try:
-                entity_start_pos = content.index(START_MARKER, entity_end_pos)
-                entity_end_pos = content.index('</ENTITY>', entity_start_pos) + len(END_MARKER)
-            except ValueError:
-                break
-            data = content[entity_start_pos:entity_end_pos]
-            #import_sanktion(data)
-            deferred.defer(import_sanktion, data)
-            row_cnt += 1
-
-        mem.file_pos += entity_end_pos
-        content = content[entity_end_pos:]
+        data = content[entity_start_pos:entity_end_pos]
+        #import_sanktion(data)
+        deferred.defer(import_sanktion, data)
+        row_cnt += 1
+    # shorten content
+    content = content[entity_end_pos:]
     return row_cnt

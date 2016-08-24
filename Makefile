@@ -15,3 +15,6 @@ boot:
 	# oder gcloud components update
 	git submodule update --init
 	pip install --upgrade --target lib/site-packages -r requirements.txt
+
+code:
+	echo "nothing to do"

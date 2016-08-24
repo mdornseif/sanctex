@@ -29,6 +29,7 @@ template_dirs = [
 SENTRY_URL = ('https://5210fba32bd84f2f958ca1becd7dbb24:5fda0dc29292459fb75fd7577186cd5e'
               '@app.getsentry.com/94020')
 
+
 def main():
     """show path for usage in scripts"""
     import lib
