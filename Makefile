@@ -4,6 +4,8 @@ REPOSNAME?=sanctex
 
 MYPYTHONPATH=lib/site-packages
 
+LINT_FILES= sanctions/ tests/*.py *.py
+
 -include ./lib/appengine-toolkit/include.mk
 
 # TODO: wie werden die Module API und sync geupdated

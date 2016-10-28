@@ -6,16 +6,11 @@ views.py
 Created by Maximillian Dornseif on 2010-11-20.
 Copyright (c) 2010, 2016 HUDORA. All rights reserved.
 """
-
-import config
-config.imported = True
-
 import logging
 import metaphone
 
 from cs.gaetk_common import make_app
 from cs.gaetk_common import wwwHandler
-from gaetk import webapp2
 from google.appengine.ext import ndb
 
 from sanctions.models import seEntity
@@ -56,39 +51,36 @@ class SearchHandler(wwwHandler):
     """
 
     def match(self, querystring):
-        """Query database for entities that have name that match 'data'."""
-        querystring = querystring.strip().lower()
+        """Query database for entities that have name that match the query"""
+
+        querystring = querystring.lower().strip()
         if not querystring:
             return [], []
-        logging.info(querystring)
-        names = seName.query().filter(seName.searchterms==querystring).fetch(25)
-        list_of_entities = ndb.get_multi([x.sanc_entity for x in names])
-        entities = dict([(x.key, x) for x in list_of_entities])
-        mph = []
-        for mp in metaphone.dm(querystring):
-            mph.extend(seName.query().filter(seName.metaphones==mp).fetch(25))
-        list_of_entities = ndb.get_multi([x.sanc_entity for x in mph])
-        fuzzyentities = dict([(x.key, x) for x in list_of_entities if x.key not in entities])
-        return entities, fuzzyentities
+        logging.info(u'Searching for %s', querystring)
+
+        query = seName.query().filter(seName.searchterms == querystring)
+        keys = [name.sanc_entity for name in query.iter(batch_size=100)]
+        matches = dict((entity.key, entity) for entity in ndb.get_multi(keys))
+
+        query = seName.query().filter(
+            seName.metaphones.IN([mp for mp in metaphone.dm(querystring) if mp]))
+        keys = [name.sanc_entity for name in query.iter(batch_size=100) if name.sanc_entity not in matches]
+        fuzzy_matches = dict((entity.key, entity) for entity in ndb.get_multi(keys))
+
+        return matches, fuzzy_matches
 
     def get(self, fmt='html'):
-        context = {}
-        names = self.request.get('name', '').strip().split('\r\n')
-        names = set(names)
+        names = set(self.request.get('name', u'').strip().splitlines())
         matches = dict()
         fuzzymatches = dict()
         for name in names:
-            entities, fuzzyentities = self.match(name.strip())
+            entities, fuzzyentities = self.match(name)
             matches.update(entities)
             fuzzymatches.update(fuzzyentities)
             logging.info("search %s %s %s", name, entities, fuzzyentities)
 
-        context['names'] = list(names)
-        context['results'] = matches.values()
-        context['fuzzyresults'] = matches.values()
-        self.multirender(fmt, context,
-                         html_template='search.html',
-                         tabular_datanodename='rechnungen')
+        values = dict(names=sorted(names), results=matches.values(), fuzzyresults=fuzzymatches.values())
+        self.multirender(fmt, values, html_template='search.html')
 
 
 class DownloadHandler(wwwHandler):
@@ -108,10 +100,10 @@ class MainHandler(wwwHandler):
 
 
 application = make_app([
-     (r'/entity/(\d+)/(.+)/', EntityHandler),
-     (r'/technik-des-santionslistenscreenings/', TechnikHandler),
-     (r'/hintergrund-der-embargolisten/', HintergrundHandler),
-     (r'/pruefung\.(json|html)', SearchHandler),
-     (r'/download/', DownloadHandler),
-     (r'/', MainHandler),
+    (r'/entity/(\d+)/(.+)/', EntityHandler),
+    (r'/technik-des-santionslistenscreenings/', TechnikHandler),
+    (r'/hintergrund-der-embargolisten/', HintergrundHandler),
+    (r'/pruefung\.(json|html)', SearchHandler),
+    (r'/download/', DownloadHandler),
+    (r'/', MainHandler),
 ])

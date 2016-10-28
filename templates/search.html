@@ -11,7 +11,7 @@
   <h2>Suche</h2>
   <div id="search_form">
     Name:<br/>
-    <form method="GET" action=".">
+    <form action="suche.html" method="GET" accept-charset="utf-8">
         <textarea name="name"></textarea>
         <input type="submit" value="testen!">
     </form>
@@ -85,9 +85,7 @@
             <br>
         {% endfor %}
     </div>
-    {% else %}
-        {% if names %}
+    {% elif names %}
         <h2>Zu Ihren Angaben wurden keine Einträge gefunden.</h2>
-        {% endif %}
     {% endif %}
 {% endblock %}
