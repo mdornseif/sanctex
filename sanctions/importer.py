@@ -6,140 +6,108 @@ importer.py - import data into sanctex
 Created by Maximillian Dornseif on 2010-11-21.
 Copyright (c) 2010, 2016 HUDORA. All rights reserved.
 """
-
-import config
-config.imported = True
-
-import huTools.http
 import logging
 import metaphone
-import pickle
 
-from google.appengine.ext import db
-from google.appengine.ext import deferred
+from lxml import etree
+
+from google.appengine.api import urlfetch
+from google.appengine.ext import ndb
 from sanctions.models import seEntity
 from sanctions.models import seName
-from xml.etree import cElementTree as ET
 
 
-class mem:
-    pass
+def get_data(elem):
+    data = dict(elem.attrib)
+    data['id'] = data.pop('Id')
+    del data['Entity_id']
 
-mem.file_pos = 0
-START_MARKER = '<ENTITY'
-END_MARKER = '</ENTITY>'
-
-
-def import_sanktion(xml):
-    logging.debug("xml: %s", xml)
-    entity = ET.fromstring(xml)
-    e = seEntity(
-               id=entity.get('Id'),
-               typ=entity.get('Type'),
-               legal_basis=entity.get('legal_basis'),
-               reg_date=entity.get('reg_date'),
-               pdf_link=entity.get('pdf_link'),
-               programme=entity.get('programme'),
-               remark=entity.get('remark'))
-    e.put()
-    putlist = [e]
-    addon_data = {}
-    for name in entity.findall('NAME'):
-        searchterms = [name.findtext('WHOLENAME'),
-            '%s %s' % (name.findtext('FIRSTNAME'), name.findtext('LASTNAME')),
-            '%s, %s' % (name.findtext('LASTNAME'), name.findtext('FIRSTNAME')),
-            ]
-        if name.findtext('MIDDLENAME'):
-            searchterms.append('%s %s %s' % (name.findtext('FIRSTNAME'), name.findtext('MIDDLENAME'),
-                                             name.findtext('LASTNAME')))
-
-        searchterms = list(set([x.strip(' ,').lower() for x in searchterms if x.strip(' ,')]))
-        metaphones = []
-        for searchterm in searchterms:
-            metaphones.extend([x for x in metaphone.dm(unicode(searchterm)) if x])
-        n = seName(id=name.get('Id'),
-                 legal_basis=name.get('legal_basis'),
-                 pdf_link=name.get('pdf_link'),
-                 programme=name.get('programme'),
-                 lastname=name.findtext('LASTNAME'),
-                 firstname=name.findtext('FIRSTNAME'),
-                 middlename=name.findtext('MIDDLENAME'),
-                 wholename=name.findtext('WHOLENAME'),
-                 gender=name.findtext('GENDER'),
-                 title=name.findtext('TITLE'),
-                 function=name.findtext('FUNCTION'),
-                 language=name.findtext('LANGUAGE'),
-                 searchterms=searchterms,
-                 metaphones=metaphones)
-        n.reg_date = name.get('reg_date')
-        n.sanc_entity = e.key
-        n.put()
-        putlist.append(n)
-    for address in entity.findall('ADDRESS'):
-        d = dict(legal_basis=address.get('legal_basis'),
-                 reg_date=address.get('reg_date') or None,
-                 pdf_link=address.get('pdf_link'),
-                 programme=address.get('programme'),
-                 number=address.findtext('NUMBER'),
-                 street=address.findtext('STREET'),
-                 city=address.findtext('CITY'),
-                 zipcode=address.findtext('ZIPCODE'),
-                 country=address.findtext('COUNTRY'),
-                 other=address.findtext('OTHER'))
-        addon_data.setdefault('addresses', []).append(d)
-    for birth in entity.findall('BIRTH'):
-        d = dict(id=birth.get('Id'),
-                 legal_basis=birth.get('legal_basis'),
-                 reg_date=birth.get('reg_date') or None,
-                 pdf_link=birth.get('pdf_link'),
-                 programme=birth.get('programme'),
-                 date=birth.findtext('DATE'),
-                 place=birth.findtext('PLACE'),
-                 country=birth.findtext('COUNTRY'))
-        addon_data.setdefault('births', []).append(d)
-    for passport in entity.findall('PASSPORT'):
-        d = dict(id=passport.get('Id'),
-                 legal_basis=passport.get('legal_basis'),
-                 reg_date=passport.get('reg_date') or None,
-                 pdf_link=passport.get('pdf_link'),
-                 programme=passport.get('programme'),
-                 number=passport.findtext('NUMBER'),
-                 country=passport.findtext('COUNTRY'))
-        addon_data.setdefault('passports', []).append(d)
-    for citizen in entity.findall('CITIZEN'):
-        d = dict(id=citizen.get('Id'),
-                 legal_basis=citizen.get('legal_basis'),
-                 reg_date=citizen.get('reg_date') or None,
-                 pdf_link=citizen.get('pdf_link'),
-                 programme=citizen.get('programme'),
-                 country=citizen.findtext('COUNTRY'))
-        addon_data.setdefault('citizenship', []).append(d)
-    logging.info("%s addon: %r", n.wholename, addon_data)
-    e.addon_data = addon_data
-    e.put()
-    #db.put(putlist)
+    data.update((child.tag.lower(), child.text or u'') for child in elem.iterchildren())
+    return data
 
 
-def read_chunks(file_pos=0):
-    # from http://eeas.europa.eu/cfsp/sanctions/consol-list/index_en.htm
-    _status, _headers, content = huTools.http.fetch2xx(
-        'http://ec.europa.eu/external_relations/cfsp/sanctions/list/version4/global/global.xml',
+def parse_entity(entity):
+
+    addon_data = dict(
+        addresses=[get_data(address) for address in entity.iterfind('ADDRESS')],
+        births=[get_data(birth) for birth in entity.iterfind('BIRTH')],
+        passports=[get_data(passport) for passport in entity.iterfind('PASSPORT')],
+        citizenship=[get_data(citizen) for citizen in entity.iterfind('CITIZEN')]
     )
-    logging.info("downloaded %d bytes", len(content))
+
+    key = ndb.Key(seEntity, entity.get('Id'))
+
+    yield seEntity(
+        key=key,
+        typ=entity.get('Type'),
+        legal_basis=entity.get('legal_basis'),
+        reg_date=entity.get('reg_date'),
+        pdf_link=entity.get('pdf_link'),
+        programme=entity.get('programme'),
+        remark=entity.get('remark'),
+        addon_data=addon_data)
+
+    for name in entity.iterfind('NAME'):
+        firstname = name.findtext('FIRSTNAME')
+        lastname = name.findtext('LASTNAME')
+        middlename = name.findtext('MIDDLENAME')
+
+        searchterms = set((
+            unicode(name.findtext('WHOLENAME', '').lower()),
+            (u'%s %s' % (firstname, lastname)).strip(' ,').lower(),
+            (u'%s, %s' % (lastname, firstname)).strip(' ,').lower(),
+            (u'%s %s %s' % (firstname, middlename, lastname)).strip(', ').lower(),
+        ))
+
+        metaphones = set()
+        for searchterm in searchterms:
+            metaphones.update((x for x in metaphone.dm(searchterm) if x))
+
+        yield seName(
+            id=name.get('Id'),
+            reg_date=name.get('reg_date'),
+            sanc_entity=key,
+            legal_basis=name.get('legal_basis'),
+            pdf_link=name.get('pdf_link'),
+            programme=name.get('programme'),
+            lastname=name.findtext('LASTNAME'),
+            firstname=name.findtext('FIRSTNAME'),
+            middlename=name.findtext('MIDDLENAME'),
+            wholename=name.findtext('WHOLENAME'),
+            gender=name.findtext('GENDER'),
+            title=name.findtext('TITLE'),
+            function=name.findtext('FUNCTION'),
+            language=name.findtext('LANGUAGE'),
+            searchterms=searchterms,
+            metaphones=metaphones)
+
+
+def get_root():
+    """Return parsed XML document"""
+
+    url = 'http://ec.europa.eu/external_relations/cfsp/sanctions/list/version4/global/global.xml'
+    parser = etree.XMLParser(remove_blank_text=True, remove_comments=True, remove_pis=True)
+    result = urlfetch.fetch(url)
+    return etree.fromstring(result.content, parser=parser)
+
+
+def parse():
+    """Parse data from XML tree"""
+
+    batch_size = 700
+
+    root = get_root()
     row_cnt = 0
-    content = content[:]
-    entity_start_pos = 0
-    entity_end_pos = 0
-    while True:
-        try:
-            entity_start_pos = content.index(START_MARKER, entity_end_pos)
-            entity_end_pos = content.index(END_MARKER, entity_start_pos) + len(END_MARKER)
-        except ValueError:
-            break
-        data = content[entity_start_pos:entity_end_pos]
-        #import_sanktion(data)
-        deferred.defer(import_sanktion, data)
+    writelist = []
+    for element in root:
         row_cnt += 1
-    # shorten content
-    content = content[entity_end_pos:]
+        if row_cnt % 100 == 0:
+            logging.debug(u'rows: %s', row_cnt)
+
+        writelist.extend(parse_entity(element))
+        if len(writelist) > batch_size:
+            ndb.put_multi(writelist)
+            writelist = []
+
+    ndb.put_multi(writelist)
     return row_cnt

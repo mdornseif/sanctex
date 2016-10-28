@@ -88,7 +88,7 @@ class DownloadHandler(wwwHandler):
     def get(self):
         """Read the global.xml file and import each data entry."""
         import sanctions.importer
-        row_cnt = sanctions.importer.read_chunks()
+        row_cnt = sanctions.importer.parse()
         self.response.headers['content-type'] = 'text/plain; charset=utf-8'
         self.response.out.write('read %d entries from global.xml' % row_cnt)
 
