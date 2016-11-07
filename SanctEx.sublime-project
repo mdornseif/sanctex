@@ -1,0 +1,47 @@
+{
+	"folders":
+	[
+		{
+			"path": ".",
+                        "file_exclude_patterns": ["*~", "*.sublime-project", "*.map"],
+                        "folder_exclude_patterns": ["venv", "lib", "modules", "tmp", "templates", "node_modules"]
+		},
+        {
+                        "file_exclude_patterns": ["*~", "*.sublime-project"],
+            "path": "modules"
+        },
+		{
+                        "file_exclude_patterns": ["*~", "*.sublime-project"],
+			"path": "templates"
+		},
+		{
+			"path": "lib",
+                        "file_exclude_patterns": ["*~", "*.sublime-project"],
+                        "folder_exclude_patterns": ["google_appengine", "site-packages", "gae_mini_profiler", "python-requests", "snowball_py"]
+		}
+	],
+    "settings":
+    {
+        "tab_size": 4,
+        "trim_trailing_white_space_on_save": true,
+        "ensure_newline_at_eof_on_save": true,
+        "translate_tabs_to_spaces": true,
+        "trim_automatic_white_space": true,
+        "detect_indentation" : false,
+        "rulers": [78, 109]
+    },
+    "build_systems":
+    [
+        {
+            "name": "Check",
+            "working_dir": "${project_path:${folder:${file_path}}}",
+            "file_regex": "^(..[^:]*):([0-9]+):?([0-9]+)?:? (.*)$",
+            "cmd": ["make", "check"]
+        },
+        {
+            "name": "Deploy (Dev)",
+            "working_dir": "${project_path:${folder:${file_path}}}",
+            "cmd": ["make", "deploy"]
+        }
+    ]
+}

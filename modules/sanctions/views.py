@@ -13,22 +13,27 @@ from cs.gaetk_common import make_app
 from cs.gaetk_common import wwwHandler
 from google.appengine.ext import ndb
 
-from sanctions.models import seEntity
-from sanctions.models import seName
+import modules.sanctions.importer
+
+from modules.sanctions.models import seEntity
+from modules.sanctions.models import seName
 
 
 class TechnikHandler(wwwHandler):
+    """Wie funktioniert das ganze?"""
     def get(self):
         self.render({}, 'how.html')
 
 
 class HintergrundHandler(wwwHandler):
+    """Informationen über die Sanktionsliste."""
     def get(self):
         self.render({}, 'hintergrund.html')
 
 
 class EntityHandler(wwwHandler):
-    def get(self, eid, name):
+    """Einen Eintrag der Sanktionsliste darstellen."""
+    def get(self, eid, _name):
         entity = seEntity.get_by_id(eid)
         self.render(dict(entity=entity), 'entity.html')
 
@@ -87,13 +92,13 @@ class DownloadHandler(wwwHandler):
     """Update the embargo entries from the global.xml file."""
     def get(self):
         """Read the global.xml file and import each data entry."""
-        import sanctions.importer
-        row_cnt = sanctions.importer.read_chunks()
+        row_cnt = modules.sanctions.importer.start_import()
         self.response.headers['content-type'] = 'text/plain; charset=utf-8'
         self.response.out.write('read %d entries from global.xml' % row_cnt)
 
 
 class MainHandler(wwwHandler):
+    """Homepage darstellen."""
     def get(self):
         # neuster Eintrag von entity.reg_date
         self.render({}, 'homepage.html')

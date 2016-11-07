@@ -7,48 +7,44 @@ Created by Maximillian Dornseif on 2010-11-21.
 Copyright (c) 2010, 2016 HUDORA. All rights reserved.
 """
 
-import config
-config.imported = True
-
-import huTools.http
 import logging
-import metaphone
-import pickle
 
-from google.appengine.ext import db
-from google.appengine.ext import deferred
-from sanctions.models import seEntity
-from sanctions.models import seName
 from xml.etree import cElementTree as ET
 
+import huTools.http
+import metaphone
 
-class mem:
-    pass
+from google.appengine.ext import deferred
+from google.appengine.ext import ndb
+from modules.sanctions.models import seEntity
+from modules.sanctions.models import seName
 
-mem.file_pos = 0
+
 START_MARKER = '<ENTITY'
 END_MARKER = '</ENTITY>'
 
 
 def import_sanktion(xml):
+    """Eine einzelne Sanktion mit ihrem XML-Fragment importieren."""
     logging.debug("xml: %s", xml)
     entity = ET.fromstring(xml)
     e = seEntity(
-               id=entity.get('Id'),
-               typ=entity.get('Type'),
-               legal_basis=entity.get('legal_basis'),
-               reg_date=entity.get('reg_date'),
-               pdf_link=entity.get('pdf_link'),
-               programme=entity.get('programme'),
-               remark=entity.get('remark'))
+        id=entity.get('Id'),
+        typ=entity.get('Type'),
+        legal_basis=entity.get('legal_basis'),
+        reg_date=entity.get('reg_date'),
+        pdf_link=entity.get('pdf_link'),
+        programme=entity.get('programme'),
+        remark=entity.get('remark'))
     e.put()
     putlist = [e]
     addon_data = {}
     for name in entity.findall('NAME'):
-        searchterms = [name.findtext('WHOLENAME'),
+        searchterms = [
+            name.findtext('WHOLENAME'),
             '%s %s' % (name.findtext('FIRSTNAME'), name.findtext('LASTNAME')),
             '%s, %s' % (name.findtext('LASTNAME'), name.findtext('FIRSTNAME')),
-            ]
+        ]
         if name.findtext('MIDDLENAME'):
             searchterms.append('%s %s %s' % (name.findtext('FIRSTNAME'), name.findtext('MIDDLENAME'),
                                              name.findtext('LASTNAME')))
@@ -57,20 +53,21 @@ def import_sanktion(xml):
         metaphones = []
         for searchterm in searchterms:
             metaphones.extend([x for x in metaphone.dm(unicode(searchterm)) if x])
-        n = seName(id=name.get('Id'),
-                 legal_basis=name.get('legal_basis'),
-                 pdf_link=name.get('pdf_link'),
-                 programme=name.get('programme'),
-                 lastname=name.findtext('LASTNAME'),
-                 firstname=name.findtext('FIRSTNAME'),
-                 middlename=name.findtext('MIDDLENAME'),
-                 wholename=name.findtext('WHOLENAME'),
-                 gender=name.findtext('GENDER'),
-                 title=name.findtext('TITLE'),
-                 function=name.findtext('FUNCTION'),
-                 language=name.findtext('LANGUAGE'),
-                 searchterms=searchterms,
-                 metaphones=metaphones)
+        n = seName(
+            id=name.get('Id'),
+            legal_basis=name.get('legal_basis'),
+            pdf_link=name.get('pdf_link'),
+            programme=name.get('programme'),
+            lastname=name.findtext('LASTNAME'),
+            firstname=name.findtext('FIRSTNAME'),
+            middlename=name.findtext('MIDDLENAME'),
+            wholename=name.findtext('WHOLENAME'),
+            gender=name.findtext('GENDER'),
+            title=name.findtext('TITLE'),
+            function=name.findtext('FUNCTION'),
+            language=name.findtext('LANGUAGE'),
+            searchterms=searchterms,
+            metaphones=metaphones)
         n.reg_date = name.get('reg_date')
         n.sanc_entity = e.key
         n.put()
@@ -117,10 +114,11 @@ def import_sanktion(xml):
     logging.info("%s addon: %r", n.wholename, addon_data)
     e.addon_data = addon_data
     e.put()
-    #db.put(putlist)
+    ndb.put(putlist)
 
 
-def read_chunks(file_pos=0):
+def start_import():
+    """Sanktionsliste herunterladen, Tasks starten."""
     # from http://eeas.europa.eu/cfsp/sanctions/consol-list/index_en.htm
     _status, _headers, content = huTools.http.fetch2xx(
         'http://ec.europa.eu/external_relations/cfsp/sanctions/list/version4/global/global.xml',
@@ -137,7 +135,6 @@ def read_chunks(file_pos=0):
         except ValueError:
             break
         data = content[entity_start_pos:entity_end_pos]
-        #import_sanktion(data)
         deferred.defer(import_sanktion, data)
         row_cnt += 1
     # shorten content

@@ -32,7 +32,7 @@ SENTRY_URL = ('https://5210fba32bd84f2f958ca1becd7dbb24:5fda0dc29292459fb75fd757
 
 def main():
     """show path for usage in scripts"""
-    import lib
+    from . import lib
     lib.this_updated_paths = True
     print ':'.join(sys.path)
 

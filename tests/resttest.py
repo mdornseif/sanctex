@@ -10,8 +10,8 @@ Copyright (c) 2011, 2016 HUDORA GmbH. All rights reserved.
 
 import sys
 
-from resttest_dsl import create_testclient_from_cli
-from resttest_dsl import get_app_version
+from gaetk.resttest_dsl import create_testclient_from_cli
+from gaetk.resttest_dsl import get_app_version
 
 
 def main():
