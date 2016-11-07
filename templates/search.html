@@ -17,6 +17,11 @@
     </form>
   </div>
 
+  {% if names %}
+    <div>
+      Suche nach {{ names|join(", ") }}.
+    </div>
+  {% endif %}
 
   {% if results %}
     <div id="results">
