@@ -114,7 +114,7 @@ def import_sanktion(xml):
     logging.info("%s addon: %r", n.wholename, addon_data)
     e.addon_data = addon_data
     e.put()
-    ndb.put(putlist)
+    ndb.put_multi(putlist)
 
 
 def start_import():
