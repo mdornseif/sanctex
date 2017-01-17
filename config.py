@@ -30,6 +30,9 @@ SENTRY_URL = ('https://5210fba32bd84f2f958ca1becd7dbb24:5fda0dc29292459fb75fd757
               '@app.getsentry.com/94020')
 
 
+IGNORE_404_WITHOUT_REFERRER = True
+
+
 def main():
     """show path for usage in scripts"""
     from . import lib
