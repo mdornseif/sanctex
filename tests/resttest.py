@@ -10,14 +10,15 @@ Copyright (c) 2011, 2016 HUDORA GmbH. All rights reserved.
 
 import sys
 
-from gaetk.resttest_dsl import create_testclient_from_cli
-from gaetk.resttest_dsl import get_app_version
+from resttest_dsl import create_testclient_from_cli
+from resttest_dsl import get_app_version
 
 
 def main():
     """Main Entry Point"""
 
-    client = create_testclient_from_cli(default_hostname='%s.sanktex.appspot.com' % get_app_version())
+    client = create_testclient_from_cli(
+        default_hostname='%s-dot-sanktex.appspot.com' % get_app_version(), users=None)
 
     client.GET('/').responds_http_status(200)
     client.GET('/pruefung.html').responds_http_status(200)
